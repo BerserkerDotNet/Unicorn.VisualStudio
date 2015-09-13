@@ -1,0 +1,152 @@
+﻿<platformUi:DialogWindow x:Class="Unicorn.VS.Views.NewConnection"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.12.0"
+        xmlns:models="clr-namespace:Unicorn.VS.Models"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:platformUi="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.12.0"
+        xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:converters="clr-namespace:Unicorn.VS.Converters"
+        Title="New Unicorn Connection" Height="266" Width="426" 
+        ResizeMode="NoResize" WindowStartupLocation="CenterOwner" 
+        Icon="/Unicorn.VS;component/Resources/connection_add.png" 
+        ShowInTaskbar="False"
+        Background="{DynamicResource {x:Static shell:VsBrushes.WindowKey}}"
+        Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}" IsTabStop="False" IsHitTestVisible="True">
+    <Window.DataContext>
+        <models:UnicornConnectionViewModel/>
+    </Window.DataContext>
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:InversedBooleanToVisibilityConverter x:Key="InversedBooleanToVisibilityConverter"/>
+        <Storyboard x:Key="FlashErrorIcon">
+            <ObjectAnimationUsingKeyFrames BeginTime="00:00:00" 
+                                       Storyboard.TargetProperty="(UIElement.Visibility)">
+                <DiscreteObjectKeyFrame KeyTime="00:00:00" Value="{x:Static Visibility.Hidden}"/>
+                <DiscreteObjectKeyFrame KeyTime="00:00:00.2000000" Value="{x:Static Visibility.Visible}"/>
+                <DiscreteObjectKeyFrame KeyTime="00:00:00.4000000" Value="{x:Static Visibility.Hidden}"/>
+                <DiscreteObjectKeyFrame KeyTime="00:00:00.6000000" Value="{x:Static Visibility.Visible}"/>
+                <DiscreteObjectKeyFrame KeyTime="00:00:00.8000000" Value="{x:Static Visibility.Hidden}"/>
+                <DiscreteObjectKeyFrame KeyTime="00:00:01" Value="{x:Static Visibility.Visible}"/>
+            </ObjectAnimationUsingKeyFrames>
+        </Storyboard>
+        <Style x:Key="myErrorTemplate" TargetType="Control">
+            <Setter Property="Validation.ErrorTemplate">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <DockPanel LastChildFill="True">
+                            <Ellipse DockPanel.Dock="Right" 
+                                 ToolTip="{Binding ElementName=myTextbox, 
+                                     Path=AdornedElement.(Validation.Errors)[0].ErrorContent}"
+                                 Width="15" Height="15" 
+                                 Margin="-25,0,0,0"
+                                 StrokeThickness="1" Fill="Red" >
+                                <Ellipse.Stroke>
+                                    <LinearGradientBrush EndPoint="1,0.5" StartPoint="0,0.5">
+                                        <GradientStop Color="#FFFA0404" Offset="0"/>
+                                        <GradientStop Color="#FFC9C7C7" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Ellipse.Stroke>
+                                <Ellipse.Triggers>
+                                    <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                        <BeginStoryboard Storyboard="{StaticResource FlashErrorIcon}"/>
+                                    </EventTrigger>
+                                </Ellipse.Triggers>
+                            </Ellipse>
+                            <TextBlock DockPanel.Dock="Right" 
+                                ToolTip="{Binding ElementName=myControl, 
+                                     Path=AdornedElement.(Validation.Errors)[0].ErrorContent}"
+                                Foreground="White"
+                                FontSize="11pt" 
+                                Margin="-15,5,0,0" FontWeight="Bold">!
+                                <TextBlock.Triggers>
+                                    <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                        <BeginStoryboard Storyboard="{StaticResource FlashErrorIcon}"/>
+                                    </EventTrigger>
+                                </TextBlock.Triggers>
+                            </TextBlock>
+                            <Border BorderBrush="Red" BorderThickness="1">
+                                <AdornedElementPlaceholder Name="myControl"/>
+                            </Border>
+                        </DockPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip"
+                        Value="{Binding RelativeSource={x:Static RelativeSource.Self},
+                        Path=(Validation.Errors)[0].ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="TextBox" BasedOn="{StaticResource myErrorTemplate}" />
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="5*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition MaxHeight="30"/>
+            <RowDefinition MaxHeight="30"/>
+            <RowDefinition MaxHeight="30"/>
+            <RowDefinition MaxHeight="40"/>
+            <RowDefinition MaxHeight="50"/>
+            <RowDefinition MaxHeight="50"/>
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0" Grid.Column="0"
+               Margin="0,0,5,0" Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}">Connection Name:</Label>
+        <TextBox Grid.Row="0" Grid.Column="1" Margin="1" FontSize="14"
+                 Text="{Binding Connection.Name, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+        <Label Grid.Row="1" Grid.Column="0"
+               Margin="0,0,5,0" Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}">Server Url:</Label>
+        <TextBox Grid.Row="1" Grid.Column="1" Margin="1" FontSize="14"
+                 Text="{Binding Connection.ServerUrl, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+        <Label Grid.Row="2" Grid.Column="0"
+               Margin="0,0,5,0" Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}">Security Token:</Label>
+        <TextBox Grid.Row="2" Grid.Column="1" Margin="1" Text="{Binding Connection.Token}" FontSize="14"/>
+        <StackPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="5">
+            <TextBlock TextWrapping="WrapWithOverflow" FontSize="10" Visibility="{Binding Connection.IsUpdateRequired, Converter={StaticResource InversedBooleanToVisibilityConverter}}">
+                NOTE: If debug compilation is enabled, you can connect without auth, otherwise please provide security token. 
+                <Hyperlink NavigateUri="https://github.com/kamsar/Unicorn#automated-deployment">Read more</Hyperlink>
+            </TextBlock>
+            <StackPanel Orientation="Horizontal" Visibility="{Binding Connection.IsUpdateRequired, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Image Source="../Resources/update_required.png"/>
+                <TextBlock TextWrapping="WrapWithOverflow" FontSize="10" Width="370" Margin="5">
+                    WARNING: This connection is running on an old version of the Unicorn.Remote. Click update to install newer version.
+                </TextBlock>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" >
+            <Button HorizontalAlignment="Left" Margin="7" Padding="2" Command="{Binding Install}">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="../Resources/installer.png" Height="24"/>
+                    <Label Content="{Binding InstallTitle}"/>
+                </StackPanel>
+            </Button>
+            <TextBlock  TextWrapping="WrapWithOverflow" FontSize="10" Margin="5" Width="308" >
+            Installation: Save Unicorn.Remote.dll and Unicorn.Remote.config to a webroot of your Sitecore instance.
+            If You don't have access to sitecore webroot, download
+            <Hyperlink NavigateUri="#" Command="{Binding DownloadPackage}">Sitecore Package</Hyperlink>
+            </TextBlock>
+        </StackPanel >
+        <StackPanel Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button HorizontalAlignment="Left" Margin="7" Padding="2" Command="{Binding TestConnection}">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="../Resources/test_connection.png" Height="24"/>
+                    <Label>Test Connection</Label>
+                </StackPanel>
+            </Button>
+            <Button HorizontalAlignment="Right" Margin="7" Padding="2" Command="{Binding Save}">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="../Resources/save.png" Height="24"/>
+                    <Label>Save</Label>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+        <ProgressBar Grid.Column="0" Grid.Row="5" IsIndeterminate="True" Margin="15" Visibility="{Binding IsActive, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+    </Grid>
+</platformUi:DialogWindow>
