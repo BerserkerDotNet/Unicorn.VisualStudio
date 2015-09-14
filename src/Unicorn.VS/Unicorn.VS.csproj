@@ -224,6 +224,10 @@
     <Resource Include="Resources\operations\info.png" />
     <Resource Include="Resources\operations\serialized.png" />
     <Resource Include="Resources\cancel.png" />
+    <Content Include="license.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="Resources\Blue-Unicorn-Icon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>

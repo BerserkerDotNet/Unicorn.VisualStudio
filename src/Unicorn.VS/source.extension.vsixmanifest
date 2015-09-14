@@ -5,6 +5,7 @@
     <DisplayName>Unicorn Control Panel</DisplayName>
     <Description>Unicorn control panel for Visual Studio</Description>
     <MoreInfo>https://github.com/BerserkerDotNet/Unicorn.VisualStudio</MoreInfo>
+    <License>license.txt</License>
     <GettingStartedGuide>https://github.com/BerserkerDotNet/Unicorn.VisualStudio/wiki</GettingStartedGuide>
     <Icon>Resources\Package.ico</Icon>
     <PreviewImage>Resources\Blue-Unicorn-Icon.png</PreviewImage>
