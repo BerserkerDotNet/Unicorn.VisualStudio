@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Web;
-using System.Web.Configuration;
-using Newtonsoft.Json;
 using Sitecore.Pipelines.HttpRequest;
 using Sitecore.Security.Authentication;
 using Sitecore.SecurityModel;
@@ -23,7 +21,6 @@ namespace Unicorn.Remote.Processor
 {
     public class UnicornRemotePipelineProcessor : HttpRequestProcessor
     {
-        private static ConcurrentDictionary<string, ProgressReporter> _currentJobs =new ConcurrentDictionary<string, ProgressReporter>();
         private static string _currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         private readonly string _activationUrl;
 
@@ -69,12 +66,6 @@ namespace Unicorn.Remote.Processor
                         case "handshake":
                             SetSuccessResponse(context);
                             break;
-                        case "report":
-                            ProcessReport(context);
-                            break;
-                        case "finish":
-                            CleanUp(context);
-                            break;
                         case "config":
                             ProcessConfiguration(context);
                             break;
@@ -86,59 +77,26 @@ namespace Unicorn.Remote.Processor
             }
         }
 
-        private void CleanUp(HttpContext context)
-        {
-            var jobId = context.Request.QueryString["id"];
-            if(string.IsNullOrEmpty(jobId))
-                return;
-
-            ProgressReporter reporter;
-            _currentJobs.TryRemove(jobId, out reporter);
-            SetSuccessResponse(context);
-        }
-
-        private void ProcessReport(HttpContext context)
-        {
-            var jobId = context.Request.QueryString["id"];
-            var timeStamp = context.Request.QueryString["lastcheck"];
-
-            ProgressReporter reporter;
-            if (!_currentJobs.TryGetValue(jobId, out reporter) || reporter == null)
-            {
-                context.Response.StatusCode = 404;
-                context.Response.StatusDescription = "Not Found";
-                return;
-            }
-
-            var reports = string.IsNullOrEmpty(timeStamp)
-                ? reporter.GetReport()
-                : reporter.GetReport(JsonConvert.DeserializeObject<DateTime>("\""+Uri.UnescapeDataString(timeStamp)+"\""));
-
-            SetJsonResponse(context, JsonConvert.SerializeObject(reports));
-
-        }
-
         private void Process(HttpContext context, Action<ProgressReporter> action)
         {
-            var jobId = context.Request.QueryString["id"];
-            if (string.IsNullOrEmpty(jobId))
-                return;
-
-            var progress = new ProgressReporter();
-            _currentJobs.TryAdd(jobId, progress);
-
-            using (new SecurityDisabler())
+            context.Response.Buffer = false;
+            context.Response.BufferOutput = false;
+            context.Response.ContentType = "text/plain";
+            SetSuccessResponse(context);
+            using (var outputStream = context.Response.OutputStream)
             {
-                using (new ItemFilterDisabler())
+                using (var streamWriter = new StreamWriter(outputStream))
                 {
-                    action(progress);
+                    var progress = new ProgressReporter(streamWriter);
+                    using (new SecurityDisabler())
+                    {
+                        using (new ItemFilterDisabler())
+                        {
+                            action(progress);
+                        }
+                    }
                 }
             }
-            SetJsonResponse(context, JsonConvert.SerializeObject(new JobDetails
-            {
-                Id = jobId,
-                Created = DateTime.Now,
-            }));
         }
 
         private void ProcessSync(ProgressReporter progress)
@@ -168,7 +126,7 @@ namespace Unicorn.Remote.Processor
                     }
                     catch (Exception ex)
                     {
-                        progress.ReportError(ex);
+                        progress.Error(ex);
                         break;
                     }
                 }
@@ -230,13 +188,14 @@ namespace Unicorn.Remote.Processor
         private void ProcessConfiguration(HttpContext context)
         {
             var configs = UnicornConfigurationManager.Configurations.Select(c => c.Name);
-            SetJsonResponse(context, JsonConvert.SerializeObject(configs));
+            var configsString = string.Join(",", configs);
+            SetTextResponse(context, configsString);
         }
 
-        private static void SetJsonResponse(HttpContext context, string data)
+        private static void SetTextResponse(HttpContext context, string data)
         {
             SetSuccessResponse(context);
-            context.Response.AddHeader("Content-Type", "application/json");
+            context.Response.AddHeader("Content-Type", "text/plain");
             context.Response.Output.Write(data);
         } 
         
@@ -269,6 +228,7 @@ namespace Unicorn.Remote.Processor
                 logger.Warn("[S] {0} because {1}".FormatWith(root.DisplayIdentifier, predicateResult.Justification));
             }
         }
+
         protected virtual bool IsAuthorized
         {
             get

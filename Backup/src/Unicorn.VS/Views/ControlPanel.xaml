@@ -1,0 +1,120 @@
+﻿<UserControl x:Class="Unicorn.VS.Views.ControlPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:Unicorn.VS.Converters"
+             xmlns:shell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.12.0"
+             xmlns:models="clr-namespace:Unicorn.VS.Models"
+             xmlns:helpers="clr-namespace:Unicorn.VS.Helpers"
+             Background="{DynamicResource {x:Static shell:VsBrushes.WindowKey}}"
+             Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="600"
+             Name="UnicornControlPanel">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:OperationTypeToImageSourceConverter x:Key="OperationTypeToImageSourceConverter"/>
+        <converters:OperationTypeToToolTipConverter x:Key="OperationTypeToToolTipConverter"/>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition/>
+            <RowDefinition>
+                <RowDefinition.Style>
+                    <Style TargetType="{x:Type RowDefinition}">
+                        <Setter Property="Height" Value="25" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=loadingBar,
+                                            Path=Visibility}" Value="Collapsed">
+                                <Setter Property="Height" Value="0" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </RowDefinition.Style>
+            </RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="2">
+            <Button Margin="0,0,5,0" x:Name="cmdSync" Click="CmdSync_OnClick" Background="Transparent" BorderBrush="Transparent" ToolTip="Synchronize database with disk">
+                <Image Source="../Resources/Live_Sync.png"/>
+            </Button>
+            <Button Margin="0,0,5,0" x:Name="cmdReserialize" Click="CmdReserialize_OnClick" Background="Transparent" BorderBrush="Transparent" ToolTip="Reserialize database on disk">
+                <Image Source="../Resources/reserialize.png"/>
+            </Button>
+            <TextBlock Text="Configuration:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+            <ComboBox ItemsSource="{Binding Configurations}" Width="150" SelectedIndex="0" x:Name="selectedConfig"/>
+            <TextBlock Text="Server:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+            <ComboBox HorizontalAlignment="Stretch" MinWidth="150" Width="150" x:Name="sitecoreServer" ItemsSource="{Binding Connections}" SelectionChanged="SitecoreServer_OnSelectionChanged">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate DataType="models:UnicornConnection">
+                        <Grid HorizontalAlignment="Stretch" Width="140">
+                            <TextBlock Text="{Binding Name}" HorizontalAlignment="Stretch" />
+                            <Button Tag="{Binding Id}" Click="CmdEditConnection_OnClick" BorderThickness="0" 
+                                    Background="Transparent" HorizontalAlignment="Right" ToolTip="Edit connection">
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="../Resources/update_required.png" Height="16" Width="16" 
+                                           Visibility="{Binding IsUpdateRequired, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    <Image Source="../Resources/connection_edit.png" Height="16" Width="16"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Button x:Name="cmdNewConnection" Click="CmdNewConnection_OnClick"  Background="Transparent" BorderBrush="Transparent" ToolTip="Create new connection">
+                <Image Source="../Resources/connection_add.png"/>
+            </Button>
+            <Button x:Name="cmdRemoveConnection" Click="CmdRemoveConnection_OnClick"  Background="Transparent" BorderBrush="Transparent" ToolTip="Remove connection">
+                <Image Source="../Resources/connection_remove.png"/>
+            </Button>
+        </StackPanel>
+        <ListBox helpers:ListBoxExtenders.AutoScrollToEnd="True" Grid.Row="1" ItemsSource="{Binding StatusReports}" Background="{DynamicResource {x:Static shell:VsBrushes.WindowKey}}" 
+                 Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}" BorderBrush="{DynamicResource {x:Static shell:VsBrushes.AccentBorderKey}}">
+            <ListBox.Resources>
+                <Style TargetType="{x:Type ListBoxItem}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding MessageLevel}" Value="2">
+                            <Setter Property="Foreground" Value="DarkOrange"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding MessageLevel}" Value="3">
+                            <Setter Property="Foreground" Value="Red"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ListBox.Resources>
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="models:StatusReport">
+                    <StackPanel Orientation="Horizontal" Margin="2">
+                        <Image Source="{Binding OperationType, Converter={StaticResource OperationTypeToImageSourceConverter}}" 
+                               Height="16" Width="16" 
+                               ToolTip="{Binding OperationType, Converter={StaticResource OperationTypeToToolTipConverter}}"/>
+                        <TextBlock Text="{Binding Message}" VerticalAlignment="Center" Margin="5,0,0,0" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <ProgressBar Grid.Row="2"
+                     IsIndeterminate="{Binding Path=IsIndetermine}" 
+                     Maximum="100"
+                     Minimum="0"
+                     Value="{Binding Path= Progress}"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Bottom"
+                     Height="25" 
+                     x:Name="loadingBar" Visibility="Collapsed"/>
+        <TextBlock Grid.Row="2"                       
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Bottom"
+                   Margin="0,0,0,5" Text="Loading..."
+                   Foreground="Black"
+                   x:Name="loadingBlock" Visibility="Collapsed" />
+        <Button x:Name="cmdCancel" Grid.Row="2" Background="{Binding ElementName=loadingBar, Path=Background}" 
+                HorizontalAlignment="Right" Click="CmdCancel_OnClick" Visibility="Collapsed" IsCancel="True">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="../Resources/cancel.png"/>
+                <TextBlock VerticalAlignment="Center">Cancel</TextBlock>
+            </StackPanel>
+        </Button>
+    </Grid>
+</UserControl>

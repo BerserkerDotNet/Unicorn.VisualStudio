@@ -110,9 +110,9 @@ namespace Unicorn.VS {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] UnicornRemote_1_0 {
+        internal static byte[] UnicornRemote_1_1 {
             get {
-                object obj = ResourceManager.GetObject("UnicornRemote_1_0", resourceCulture);
+                object obj = ResourceManager.GetObject("UnicornRemote_1_1", resourceCulture);
                 return ((byte[])(obj));
             }
         }

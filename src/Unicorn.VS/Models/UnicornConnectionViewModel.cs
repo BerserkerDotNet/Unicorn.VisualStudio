@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -58,10 +61,7 @@ namespace Unicorn.VS.Models
 
         public Action<bool> Close { get; set; }
 
-        public string InstallTitle
-        {
-            get { return Connection.IsUpdateRequired ? "Update" : "Install"; }
-        }
+        public string InstallTitle => Connection.IsUpdateRequired ? "Update" : "Install";
 
         public void SetData(UnicornConnection data)
         {
@@ -74,13 +74,7 @@ namespace Unicorn.VS.Models
             try
             {
                 IsActive = true;
-                var response = await Connection.Get(HttpHelper.HandshakeCommand)
-                    .ExecuteRaw(CancellationToken.None);
-                if (response.IsSuccessStatusCode)
-                    MessageBox.Show("All good!", "Connection test", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                else
-                    MessageBox.Show("Ooops..." + response.ReasonPhrase, "Connection test", MessageBoxButtons.OK,
-                        MessageBoxIcon.Exclamation);
+                await Handshake();
             }
             catch(Exception ex)
             {
@@ -126,12 +120,7 @@ namespace Unicorn.VS.Models
                         var unicornRemoteConfig = Encoding.UTF8.GetBytes(Resources.Unicorn_Remote_Config);
                         await wStream.WriteAsync(unicornRemoteConfig, 0, unicornRemoteConfig.Length);
                     }
-
-                    await Connection.Get(HttpHelper.HandshakeCommand)
-                        .ExecuteRaw(CancellationToken.None);
-
-                    MessageBox.Show("Installation successful", "Installing Unicorn Remote", MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
+                    await Handshake();
                 }
                 catch (Exception ex)
                 {
@@ -142,6 +131,23 @@ namespace Unicorn.VS.Models
                 {
                     IsActive = false;
                 }
+            }
+        }
+
+        private async Task Handshake()
+        {
+            var endPoint = Connection.Get(HttpHelper.HandshakeCommand).Build();
+            using (var client = new HttpClient())
+            {
+                var response = await client.GetAsync(endPoint, CancellationToken.None);
+                IEnumerable<string> values;
+                _connection.IsUpdateRequired = !response.Headers.TryGetValues("X-Remote-Version", out values) || values.All(v => v != HttpHelper.CurrentClientVersion);
+                if (response.IsSuccessStatusCode)
+                    MessageBox.Show("All good!", "Connection test", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                else
+                    MessageBox.Show("Ooops..." + response.ReasonPhrase, "Connection test", MessageBoxButtons.OK,
+                        MessageBoxIcon.Exclamation);
+
             }
         }
 
@@ -156,7 +162,7 @@ namespace Unicorn.VS.Models
                     saveFileDialog.DefaultExt = ".zip";
                     if (saveFileDialog.ShowDialog() != DialogResult.OK)
                         return;
-                    var bytes = (byte[]) Resources.ResourceManager.GetObject("UnicornRemote_1_0");
+                    var bytes = (byte[]) Resources.ResourceManager.GetObject("UnicornRemote_1_1");
                     using (var stream = saveFileDialog.OpenFile())
                     {
                         stream.Write(bytes, 0, bytes.Length);

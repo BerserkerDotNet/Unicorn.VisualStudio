@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -7,13 +6,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using Newtonsoft.Json;
 using Unicorn.VS.Data;
 using Unicorn.VS.Helpers;
 using Unicorn.VS.Models;
+using System.Net.Http;
+using System.IO;
+using Unicorn.Remote.Logging;
 using Unicorn.VS.Types;
-using Brush = System.Drawing.Brush;
 
 namespace Unicorn.VS.Views
 {
@@ -26,7 +25,7 @@ namespace Unicorn.VS.Views
         public ControlPanel()
         {
             InitializeComponent();
-            _dataContext = new UnicornData(new[] {HttpHelper.DefaultConfiguration}, SettingsHelper.GetAllConnections());
+            _dataContext = new UnicornData(new[] { HttpHelper.DefaultConfiguration }, SettingsHelper.GetAllConnections());
             DataContext = _dataContext;
             //StartLoading();
             //Task.Run(async () =>
@@ -118,7 +117,6 @@ namespace Unicorn.VS.Views
 
         private async void SitecoreServer_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
             if (e.AddedItems.Count == 0)
                 return;
             _selectedConnection = e.AddedItems[0] as UnicornConnection;
@@ -132,65 +130,71 @@ namespace Unicorn.VS.Views
             StartLoading(false);
             try
             {
-                var id = Guid.NewGuid().ToString("N");
-                var hasFinished = false;
-#pragma warning disable 4014
-                StartJob(command, id, ct).ContinueWith(_ => hasFinished = true, ct);
-#pragma warning restore 4014
-                while (true)
+                var endPoint =  _selectedConnection.Get(command)
+                    .WithConfiguration(selectedConfig.Text)
+                    .AsStreamed()
+                    .Build();
+
+                using (var client = new HttpClient())
                 {
-                    await Task.Delay(1000, ct);
-                    if (hasFinished)
-                    {
-                        await RefreshStatus(id, ct);
-                        await FinishSync(id, ct);
-                        Dispatcher.Invoke(StopLoading);
-                        break;
-                    }
-                    await RefreshStatus(id, ct);
+                    client.Timeout = TimeSpan.FromMilliseconds(Timeout.Infinite);
+                    var response = await client.GetAsync(endPoint, HttpCompletionOption.ResponseHeadersRead, ct)
+                        .ConfigureAwait(false);
+                    IEnumerable<string> values;
+                    _selectedConnection.IsUpdateRequired = !response.Headers.TryGetValues("X-Remote-Version", out values) || values.All(v => v != HttpHelper.CurrentClientVersion);
+                    await RefreshStatus(response, ct)
+                        .ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
             {
-                var msg = string.Format("Error while performin {0} configuration for '{1}': {2}",jobName, _selectedConnection, ex.Message);
+                var msg = $"Error while performing {jobName} configuration for '{_selectedConnection}': {ex.Message}";
                 MessageBox.Show(msg, jobName, MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
-                StopLoading();
+                Dispatcher.Invoke(StopLoading);
             }
         }
 
-        private async Task RefreshStatus(string id, CancellationToken ct)
+        private async Task RefreshStatus(HttpResponseMessage response, CancellationToken ct)
         {
-            var lastMessage = _dataContext.StatusReports.LastOrDefault();
-            var lastCheckData = lastMessage == null ? string.Empty : JsonConvert.SerializeObject(lastMessage.MessageTime.AddMilliseconds(10)).Trim('\"');
-            var report = await _selectedConnection.Get(HttpHelper.ReportCommand)
-                .WithId(id)
-                .WithConfiguration(selectedConfig.Text)
-                .WithKey("lastcheck", lastCheckData)
-                .Execute<Report>(ct);
+            using (var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+            {
+                using (var sr = new StreamReader(stream))
+                {
+                    while (!sr.EndOfStream)
+                    {
+                        if (ct.IsCancellationRequested)
+                            break;
 
-            if (report == null)
-                return;
-            report.StatusReports.ToList().ForEach(r => _dataContext.StatusReports.Add(r));
-            _dataContext.Progress = report.Progress;
+                        var message = await sr.ReadLineAsync()
+                            .ConfigureAwait(false);
+                        var statusReport = message.ToReport();
+                        UpdateProgress(statusReport);
+                    }
+                }
+            }
         }
 
-        private async Task FinishSync(string id, CancellationToken ct)
+        private void UpdateProgress(StatusReport statusReport)
         {
-            await _selectedConnection.Get(HttpHelper.FinishSyncCommand)
-                .WithId(id)
-                .WithConfiguration(selectedConfig.Text)
-                .Execute<object>(ct);
-        }
-
-        private async Task StartJob(string command, string jobId, CancellationToken ct)
-        {
-            await _selectedConnection.Get(command)
-                .WithId(jobId)
-                .WithConfiguration(selectedConfig.Text)
-                .Execute<JobDetails>(ct);
+            Dispatcher.Invoke(() =>
+            {
+                try
+                {
+                    if (statusReport.IsProgressReport())
+                        _dataContext.Progress = int.Parse(statusReport.Message);
+                    else
+                        _dataContext.StatusReports.Add(statusReport);
+                }
+                catch (Exception ex)
+                {
+                    _dataContext.StatusReports.Add(
+                        StatusReport.CreateOperation("Malformated package. " + ex.Message,
+                            MessageLevel.Error, OperationType.None));
+                }
+            });
         }
 
         private async Task RefreshConfiguration()
@@ -199,21 +203,29 @@ namespace Unicorn.VS.Views
             try
             {
                 _cancellationTokenSource = new CancellationTokenSource();
-                var configs = await _selectedConnection.Get(HttpHelper.ConfigCommand)
-                    .Execute<IEnumerable<string>>(_cancellationTokenSource.Token);
+                var endPoint = _selectedConnection.Get(HttpHelper.ConfigCommand)
+                    .Build();
 
-                _dataContext.Configurations.Clear();
-                _dataContext.Configurations.Add(HttpHelper.DefaultConfiguration);
-                foreach (var config in configs)
+                using (var client = new HttpClient())
                 {
-                    _dataContext.Configurations.Add(config);
+                    var response = await client.GetAsync(endPoint, _cancellationTokenSource.Token);
+                    IEnumerable<string> values;
+                    _selectedConnection.IsUpdateRequired = !response.Headers.TryGetValues("X-Remote-Version", out values) || values.All(v => v != HttpHelper.CurrentClientVersion);
+                    var configsString = await response.Content.ReadAsStringAsync();
+                    var configs = configsString.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+                    _dataContext.Configurations.Clear();
+                    _dataContext.Configurations.Add(HttpHelper.DefaultConfiguration);
+                    foreach (var config in configs)
+                    {
+                        _dataContext.Configurations.Add(config);
+                    }
+                    selectedConfig.SelectedIndex = 0;
                 }
-                selectedConfig.SelectedIndex = 0;
+
             }
             catch (Exception ex)
             {
-                var msg = string.Format("Error while retrieving configuration for '{0}': {1}", _selectedConnection.Name,
-                    ex.Message);
+                var msg = $"Error while retrieving configuration for '{_selectedConnection.Name}': {ex.Message}";
                 MessageBox.Show(msg, "Retrieve configuration", MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
@@ -263,25 +275,30 @@ namespace Unicorn.VS.Views
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void StartLoading(bool isIndetermine=true)
+        private void StartLoading(bool isIndetermine = true)
         {
-            _dataContext.Progress = 0;
-            _dataContext.IsIndetermine = isIndetermine;
-            loadingBlock.Text = "Loading...";
-            loadingBlock.Visibility = Visibility.Visible;
-            loadingBar.Visibility = Visibility.Visible;
-            cmdCancel.Visibility = Visibility.Visible;
-            DisableControls();
-
+            Dispatcher.Invoke(() =>
+            {
+                _dataContext.Progress = 0;
+                _dataContext.IsIndetermine = isIndetermine;
+                loadingBlock.Text = "Loading...";
+                loadingBlock.Visibility = Visibility.Visible;
+                loadingBar.Visibility = Visibility.Visible;
+                cmdCancel.Visibility = Visibility.Visible;
+                DisableControls();
+            });
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void StopLoading()
         {
-            loadingBlock.Visibility = Visibility.Collapsed;
-            loadingBar.Visibility = Visibility.Collapsed;
-            cmdCancel.Visibility = Visibility.Collapsed;
-            EnableControls();
+            Dispatcher.Invoke(() =>
+            {
+                loadingBlock.Visibility = Visibility.Collapsed;
+                loadingBar.Visibility = Visibility.Collapsed;
+                cmdCancel.Visibility = Visibility.Collapsed;
+                EnableControls();
+            });
         }
     }
 }

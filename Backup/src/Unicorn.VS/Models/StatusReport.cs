@@ -1,6 +1,7 @@
 using System;
+using Unicorn.VS.Types;
 
-namespace Unicorn.Remote.Logging
+namespace Unicorn.VS.Models
 {
     public class StatusReport
     {
@@ -13,9 +14,9 @@ namespace Unicorn.Remote.Logging
         }
 
         public DateTime MessageTime { get; set; }
-        public MessageLevel MessageLevel { get; private set; }
-        public OperationType OperationType { get; private set; }
-        public string Message { get; private set; }
+        public MessageLevel MessageLevel { get; set; }
+        public OperationType OperationType { get; set; }
+        public string Message { get; set; }
 
     }
 }

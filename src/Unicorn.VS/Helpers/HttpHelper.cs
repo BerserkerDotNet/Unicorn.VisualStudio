@@ -6,25 +6,23 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Newtonsoft.Json;
+using System.Windows.Threading;
 using Unicorn.VS.Models;
 
 namespace Unicorn.VS.Helpers
 {
     public class HttpHelper
     {
-        public static string CurrentClientVersion = "1.0.0.0";
+        public static string CurrentClientVersion = "1.1.0.0";
         private readonly UnicornConnection _connection;
         private readonly string _command;
-        private string _id;
         private string _configuration;
         private readonly Dictionary<string, string> _additionalKeys;
+        private bool _isStreamed = false;
 
         public const string ConfigCommand = "Config";
         public const string StartSyncCommand = "Sync";
         public const string StartReserializeCommand = "Reserialize";
-        public const string FinishSyncCommand = "Finish";
-        public const string ReportCommand = "Report";
         public const string HandshakeCommand = "Handshake";
         public const string DefaultConfiguration = "All";
 
@@ -33,12 +31,6 @@ namespace Unicorn.VS.Helpers
             _connection = connection;
             _command = command;
             _additionalKeys = new Dictionary<string, string>(1);
-        }
-
-        public HttpHelper WithId(string id)
-        {
-            _id = id;
-            return this;
         }
 
         public HttpHelper WithConfiguration(string configuration)
@@ -53,60 +45,25 @@ namespace Unicorn.VS.Helpers
             return this;
         }
 
-        public async Task<T> Execute<T>(CancellationToken ct)
+        public HttpHelper AsStreamed()
         {
-            if (_connection == null)
-            {
-                MessageBox.Show("Please select server to synchronize", "Server not selected",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Exclamation);
-                return default(T);
-            }
-
-            var response = await ExecuteInternal(ct);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var data = await response.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<T>(data);
-            }
-
-            return default(T);
+            _isStreamed = true;
+            return this;
         }
 
-        public async Task<HttpResponseMessage> ExecuteRaw(CancellationToken ct)
+        public string Build()
         {
-            if (_connection == null)
-            {
-                MessageBox.Show("Please select server to synchronize", "Server not selected",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Exclamation);
-                return null;
-            }
-
-            return await ExecuteInternal(ct);
-        }
-
-        private async Task<HttpResponseMessage> ExecuteInternal(CancellationToken ct)
-        {
-            using (var client = new HttpClient())
-            {
-                var endpointUrl = _connection.ServerUrl;
-                if (!endpointUrl.StartsWith("http"))
-                    endpointUrl = "http://" + endpointUrl;
-                var configuration = GetConfiguration();
-                endpointUrl += "/unicornRemote.aspx?verb=" + _command;
-                if (!string.IsNullOrEmpty(_id))
-                    endpointUrl += "&id=" + _id;
-                if (!string.IsNullOrEmpty(configuration))
-                    endpointUrl += configuration;
-                var keys = _additionalKeys.Aggregate(string.Empty,
-                    (s, p) => "&" + s + p.Key + "=" + Uri.EscapeDataString(p.Value));
-                endpointUrl += keys.TrimEnd('&', '=');
-                var response = await client.GetAsync(endpointUrl, ct);
-                IEnumerable<string> values;
-                _connection.IsUpdateRequired = !response.Headers.TryGetValues("X-Remote-Version", out values) || values.All(v => v != CurrentClientVersion);
-                return response;
-            }
+            var endpointUrl = _connection.ServerUrl;
+            if (!endpointUrl.StartsWith("http"))
+                endpointUrl = "http://" + endpointUrl;
+            var configuration = GetConfiguration();
+            endpointUrl += "/unicornRemote.aspx?verb=" + _command;
+            if (!string.IsNullOrEmpty(configuration))
+                endpointUrl += configuration;
+            var keys = _additionalKeys.Aggregate(string.Empty,
+                (s, p) => "&" + s + p.Key + "=" + Uri.EscapeDataString(p.Value));
+            endpointUrl += keys.TrimEnd('&', '=');
+            return endpointUrl;
         }
 
         private string GetConfiguration()

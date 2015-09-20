@@ -113,7 +113,7 @@
                 HorizontalAlignment="Right" Click="CmdCancel_OnClick" Visibility="Collapsed" IsCancel="True">
             <StackPanel Orientation="Horizontal">
                 <Image Source="../Resources/cancel.png"/>
-                <TextBlock VerticalAlignment="Center">Cancel</TextBlock>
+                <TextBlock VerticalAlignment="Center" Margin="2">Cancel</TextBlock>
             </StackPanel>
         </Button>
     </Grid>

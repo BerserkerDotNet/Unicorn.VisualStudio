@@ -1,4 +1,4 @@
-﻿namespace Unicorn.VS.Types
+﻿namespace Unicorn.Remote.Logging
 {
     public enum MessageLevel
     {

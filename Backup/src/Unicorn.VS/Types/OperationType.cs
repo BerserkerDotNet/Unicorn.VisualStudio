@@ -1,4 +1,4 @@
-namespace Unicorn.Remote.Logging
+namespace Unicorn.VS.Types
 {
     public enum OperationType
     {

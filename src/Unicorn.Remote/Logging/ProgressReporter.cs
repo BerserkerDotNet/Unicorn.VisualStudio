@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using Unicorn.ControlPanel;
 using Unicorn.Logging;
 
@@ -8,142 +10,60 @@ namespace Unicorn.Remote.Logging
 {
     public class ProgressReporter: ILogger
     {
-        private readonly List<StatusReport> _reports;
-        private int _progress;
+        private StreamWriter _output;
 
-        public ProgressReporter()
+        public ProgressReporter(StreamWriter output)
         {
-            _reports = new List<StatusReport>(100);
-            _progress = 0;
+            this._output = output;
         }
 
         public void ReportSimple(string text, MessageLevel level)
         {
-            _reports.Add(new StatusReport(text, level, OperationType.None));
-        }
-
-        public void ReportAdded(string text, MessageLevel level)
-        {
-            _reports.Add(new StatusReport(text, level, OperationType.Added));
-        }
-
-        public void ReportUpdated(string text, MessageLevel level)
-        {
-            _reports.Add(new StatusReport(text, level, OperationType.Updated));
-        }
-
-        public void ReportDeleted(string text, MessageLevel level)
-        {
-            _reports.Add(new StatusReport(text, level, OperationType.Deleted));
-        }
-
-        public void ReportTemplateChanged(string text, MessageLevel level)
-        {
-            _reports.Add(new StatusReport(text, level, OperationType.TemplateChanged));
-        }
-
-        public void ReportRenamed(string text, MessageLevel level)
-        {
-            _reports.Add(new StatusReport(text, level, OperationType.Renamed));
-        }
-
-        public void ReportMoved(string text, MessageLevel level)
-        {
-            _reports.Add(new StatusReport(text, level, OperationType.Moved));
-        }
-        
-        public void ReportSerialized(string text, MessageLevel level)
-        {
-            _reports.Add(new StatusReport(text, level, OperationType.Serialized));
-        }
-
-        private void ReportError(string exception)
-        {
-            _reports.Add(new StatusReport(exception, MessageLevel.Error, OperationType.None));
-        }
-
-        public void ReportError(Exception exception)
-        {
-            _reports.Add(new StatusReport(exception.ToString(), MessageLevel.Error, OperationType.None));
+            SendOpeartionMessage(level, text);
         }
 
         public void Info(string message)
         {
-            ReportMessage(message, MessageLevel.Info);
+            SendOpeartionMessage(MessageLevel.Info, message);
         }
 
         public void Debug(string message)
         {
-            ReportMessage(message, MessageLevel.Debug);
+            SendOpeartionMessage(MessageLevel.Debug, message);
         }
 
         public void Warn(string message)
         {
-            ReportMessage(message, MessageLevel.Warning);
+            SendOpeartionMessage(MessageLevel.Warning, message);
         }
 
         public void Error(string message)
         {
-            ReportError(message);
+            SendOpeartionMessage(MessageLevel.Error, message);
         }
 
         public void Error(Exception exception)
         {
-            ReportError(exception);
+            SendOpeartionMessage(MessageLevel.Error, exception.ToString());
         }
 
         public void ReportProgress(int progress)
         {
-            _progress = progress;
+            SendMessage(ReportType.Progress, MessageLevel.Info, progress.ToString());
         }
 
-        public Report GetReport(DateTime lastCheck)
+        private void SendOpeartionMessage(MessageLevel level, string message)
         {
-            var status = _reports.Where(r => r.MessageTime >= lastCheck).ToList();
-            return new Report
-            {
-                Progress = _progress,
-                StatusReports = status
-            };
+            SendMessage(ReportType.Operation, level, message);
         }
 
-        public Report GetReport()
+        private void SendMessage(ReportType type, MessageLevel level, string message)
         {
-            return new Report
-            {
-                Progress = _progress,
-                StatusReports = _reports
-            };
-        }
+            var encodedMessage = Convert.ToBase64String(Encoding.UTF8.GetBytes(message));
+            var report = $"{type}|{level}|{encodedMessage}";
+            _output.WriteLine(report);
+            _output.Flush();
 
-        private void ReportMessage(string message, MessageLevel level)
-        {
-            const string addedTag = "[A]";
-            const string updatedTag = "[U]";
-            const string deletedTag = "[D]";
-            const string templateChangedTag = "[T]";
-            const string renamedTag = "[R]";
-            const string movedTag = "[M]";
-            const string serializedTag = "[S]";
-
-            message = message.Trim();
-
-            if (message.Contains(addedTag))
-                ReportAdded(message.Replace(addedTag, "").Trim(), level);
-            else if (message.Contains(updatedTag))
-                ReportUpdated(message.Replace(updatedTag, "").Trim(), level);
-            else if (message.Contains(deletedTag))
-                ReportDeleted(message.Replace(deletedTag, "").Trim(), level);
-            else if (message.Contains(templateChangedTag))
-                ReportTemplateChanged(message.Replace(templateChangedTag, "").Trim(), level);
-            else if (message.Contains(renamedTag))
-                ReportRenamed(message.Replace(renamedTag, "").Trim(), level);
-            else if (message.Contains(movedTag))
-                ReportMoved(message.Replace(movedTag, "").Trim(), level); 
-            else if (message.Contains(serializedTag))
-                ReportSerialized(message.Replace(serializedTag, "").Trim(), level);
-            else
-                ReportSimple(message, level);
         }
     }
 }
