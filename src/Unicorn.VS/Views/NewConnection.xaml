@@ -9,7 +9,7 @@
         xmlns:platformUi="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.12.0"
         xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns:converters="clr-namespace:Unicorn.VS.Converters"
-        Title="New Unicorn Connection" Height="266" Width="426" 
+        Title="New Unicorn Connection" Height="280" Width="426" 
         ResizeMode="NoResize" WindowStartupLocation="CenterOwner" 
         Icon="/Unicorn.VS;component/Resources/connection_add.png" 
         ShowInTaskbar="False"
@@ -93,7 +93,7 @@
             <RowDefinition MaxHeight="30"/>
             <RowDefinition MaxHeight="30"/>
             <RowDefinition MaxHeight="30"/>
-            <RowDefinition MaxHeight="40"/>
+            <RowDefinition MaxHeight="55"/>
             <RowDefinition MaxHeight="50"/>
             <RowDefinition MaxHeight="50"/>
         </Grid.RowDefinitions>
@@ -109,14 +109,18 @@
                Margin="0,0,5,0" Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}">Security Token:</Label>
         <TextBox Grid.Row="2" Grid.Column="1" Margin="1" Text="{Binding Connection.Token}" FontSize="14"/>
         <StackPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="5">
-            <TextBlock TextWrapping="WrapWithOverflow" FontSize="10" Visibility="{Binding Connection.IsUpdateRequired, Converter={StaticResource InversedBooleanToVisibilityConverter}}">
-                NOTE: If debug compilation is enabled, you can connect without auth, otherwise please provide security token. 
+            <StackPanel Orientation="Horizontal" Visibility="{Binding Connection.IsUpdateRequired, Converter={StaticResource InversedBooleanToVisibilityConverter}}">
+                <Image Source="../Resources/operations/info.png"/>
+                <TextBlock TextWrapping="WrapWithOverflow" FontSize="10" Width="370" Margin="5">
+                  NOTE: If debug compilation is enabled, you can connect without auth, otherwise please provide security token. 
                 <Hyperlink NavigateUri="https://github.com/kamsar/Unicorn#automated-deployment">Read more</Hyperlink>
-            </TextBlock>
+                <LineBreak/><Bold>Unicorn.Remote is part of Unicorn 3.0, so no installation required.</Bold>
+                </TextBlock>
+            </StackPanel>
             <StackPanel Orientation="Horizontal" Visibility="{Binding Connection.IsUpdateRequired, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Image Source="../Resources/update_required.png"/>
                 <TextBlock TextWrapping="WrapWithOverflow" FontSize="10" Width="370" Margin="5">
-                    WARNING: This connection is running on an old version of the Unicorn.Remote. Click update to install newer version.
+                    WARNING: This connection is running on an old version of the Unicorn.Remote. Update your Unicorn NuGet package for Unicorn 3.0 and above or click update if you running on older versions of Unicorn.
                 </TextBlock>
             </StackPanel>
         </StackPanel>
@@ -128,7 +132,7 @@
                 </StackPanel>
             </Button>
             <TextBlock  TextWrapping="WrapWithOverflow" FontSize="10" Margin="5" Width="308" >
-            Installation: Save Unicorn.Remote.dll and Unicorn.Remote.config to a webroot of your Sitecore instance.
+           If you have older version, please save Unicorn.Remote.dll and Unicorn.Remote.config to a webroot of your Sitecore instance.
             If You don't have access to sitecore webroot, download
             <Hyperlink NavigateUri="#" Command="{Binding DownloadPackage}">Sitecore Package</Hyperlink>
             </TextBlock>

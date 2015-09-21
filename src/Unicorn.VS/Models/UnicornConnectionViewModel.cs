@@ -106,6 +106,21 @@ namespace Unicorn.VS.Models
                     var configPath = Path.Combine(folderBrowser.SelectedPath, "App_Config\\Include");
                     if (!Directory.Exists(binPath))
                         Directory.CreateDirectory(binPath);
+
+                    var unicornPath = Path.Combine(binPath, "Unicorn.dll");
+                    if (File.Exists(unicornPath))
+                    {
+                        var versionInfo = FileVersionInfo.GetVersionInfo(unicornPath);
+                        var isUnicornRemoteIntegrated = VersionHelper.IsSupportedUnicornVersion(versionInfo.FileVersion);
+                        if (isUnicornRemoteIntegrated)
+                        {
+                            MessageBox.Show(
+                                $"Unicorn {versionInfo.FileVersion} supports Remote out of the box, no need to install external library.",
+                                "Install canceled", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                            return;
+                        }
+                    }
+
                     using (var wStream = File.OpenWrite(Path.Combine(binPath, "Unicorn.Remote.dll")))
                     {
                         var unicornRemote = Resources.Unicorn_Remote;
@@ -140,8 +155,7 @@ namespace Unicorn.VS.Models
             using (var client = new HttpClient())
             {
                 var response = await client.GetAsync(endPoint, CancellationToken.None);
-                IEnumerable<string> values;
-                _connection.IsUpdateRequired = !response.Headers.TryGetValues("X-Remote-Version", out values) || values.All(v => v != HttpHelper.CurrentClientVersion);
+                _connection.IsUpdateRequired = response.IsUpdateRequired();
                 if (response.IsSuccessStatusCode)
                     MessageBox.Show("All good!", "Connection test", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 else
@@ -158,7 +172,7 @@ namespace Unicorn.VS.Models
                 try
                 {
                     IsActive = true;
-                    saveFileDialog.FileName = string.Format("UnicornRemote-{0}.zip", HttpHelper.CurrentClientVersion);
+                    saveFileDialog.FileName = $"UnicornRemote-{VersionHelper.SupportedClientVersion}.zip";
                     saveFileDialog.DefaultExt = ".zip";
                     if (saveFileDialog.ShowDialog() != DialogResult.OK)
                         return;

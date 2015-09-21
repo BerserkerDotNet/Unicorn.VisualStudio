@@ -1,0 +1,3 @@
+Version 1.2
+ - fixed warning promting to update Unicorn.Remote.dll if using Unicorn 3.0 or above
+ - new official icon

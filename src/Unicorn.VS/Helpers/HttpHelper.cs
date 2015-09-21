@@ -13,12 +13,10 @@ namespace Unicorn.VS.Helpers
 {
     public class HttpHelper
     {
-        public static string CurrentClientVersion = "1.1.0.0";
         private readonly UnicornConnection _connection;
         private readonly string _command;
         private string _configuration;
         private readonly Dictionary<string, string> _additionalKeys;
-        private bool _isStreamed = false;
 
         public const string ConfigCommand = "Config";
         public const string StartSyncCommand = "Sync";
@@ -42,12 +40,6 @@ namespace Unicorn.VS.Helpers
         public HttpHelper WithKey(string key, string value)
         {
             _additionalKeys.Add(key, value);
-            return this;
-        }
-
-        public HttpHelper AsStreamed()
-        {
-            _isStreamed = true;
             return this;
         }
 

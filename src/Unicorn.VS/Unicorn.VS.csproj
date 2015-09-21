@@ -137,6 +137,7 @@
     <Compile Include="Converters\OperationTypeToToolTipConverter.cs" />
     <Compile Include="Exceptions\MalformedPackageReceivedException.cs" />
     <Compile Include="Helpers\StringExtensions.cs" />
+    <Compile Include="Helpers\VersionHelper.cs" />
     <Compile Include="Models\StatusReport.cs" />
     <Compile Include="Models\UnicornConnection.cs" />
     <Compile Include="Models\UnicornConnectionViewModel.cs" />
@@ -181,7 +182,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Unicorn.Remote.Config.config" />
-    <None Include="Resources\UnicornRemote-1.0.zip" />
     <None Include="Resources\UnicornRemote-1.1.zip" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
@@ -226,11 +226,16 @@
     <Resource Include="Resources\operations\info.png" />
     <Resource Include="Resources\operations\serialized.png" />
     <Resource Include="Resources\cancel.png" />
+    <Content Include="gallery_logo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="license.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="Resources\Blue-Unicorn-Icon.png">
+    <Resource Include="Resources\gallery_logo.png" />
+    <Content Include="releasenotes.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>

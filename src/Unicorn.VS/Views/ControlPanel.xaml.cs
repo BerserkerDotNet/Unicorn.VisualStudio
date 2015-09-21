@@ -132,7 +132,6 @@ namespace Unicorn.VS.Views
             {
                 var endPoint =  _selectedConnection.Get(command)
                     .WithConfiguration(selectedConfig.Text)
-                    .AsStreamed()
                     .Build();
 
                 using (var client = new HttpClient())
@@ -140,8 +139,7 @@ namespace Unicorn.VS.Views
                     client.Timeout = TimeSpan.FromMilliseconds(Timeout.Infinite);
                     var response = await client.GetAsync(endPoint, HttpCompletionOption.ResponseHeadersRead, ct)
                         .ConfigureAwait(false);
-                    IEnumerable<string> values;
-                    _selectedConnection.IsUpdateRequired = !response.Headers.TryGetValues("X-Remote-Version", out values) || values.All(v => v != HttpHelper.CurrentClientVersion);
+                    _selectedConnection.IsUpdateRequired = response.IsUpdateRequired();
                     await RefreshStatus(response, ct)
                         .ConfigureAwait(false);
                 }
@@ -209,8 +207,7 @@ namespace Unicorn.VS.Views
                 using (var client = new HttpClient())
                 {
                     var response = await client.GetAsync(endPoint, _cancellationTokenSource.Token);
-                    IEnumerable<string> values;
-                    _selectedConnection.IsUpdateRequired = !response.Headers.TryGetValues("X-Remote-Version", out values) || values.All(v => v != HttpHelper.CurrentClientVersion);
+                    _selectedConnection.IsUpdateRequired = response.IsUpdateRequired();
                     var configsString = await response.Content.ReadAsStringAsync();
                     var configs = configsString.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
                     _dataContext.Configurations.Clear();
