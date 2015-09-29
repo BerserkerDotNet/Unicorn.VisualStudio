@@ -25,7 +25,7 @@ namespace Unicorn.VS.Views
         public ControlPanel()
         {
             InitializeComponent();
-            _dataContext = new UnicornData(new[] { HttpHelper.DefaultConfiguration }, SettingsHelper.GetAllConnections());
+            _dataContext = new UnicornData(new []  {HttpHelper.DefaultConfiguration }, SettingsHelper.GetAllConnections());
             DataContext = _dataContext;
             //StartLoading();
             //Task.Run(async () =>
@@ -66,7 +66,7 @@ namespace Unicorn.VS.Views
             if (selectedItem == null)
                 return;
 
-            var result = MessageBox.Show(string.Format("Delete connection '{0}'?", selectedItem.Name), "Confirm", MessageBoxButton.YesNo,
+            var result = MessageBox.Show($"Delete connection '{selectedItem.Name}'?", "Confirm", MessageBoxButton.YesNo,
                 MessageBoxImage.Warning);
             if (result != MessageBoxResult.Yes)
                 return;
@@ -77,18 +77,17 @@ namespace Unicorn.VS.Views
                 sitecoreServer.SelectedIndex = 0;
         }
 
-        private void CmdEditConnection_OnClick(object sender, RoutedEventArgs e)
+        private async void CmdEditConnection_OnClick(object sender, RoutedEventArgs e)
         {
             var button = (sender as Button);
-            if (button == null)
-                return;
 
-            var connectionId = button.Tag;
+            var connectionId = button?.Tag;
             if (connectionId == null)
                 return;
 
             var info = _dataContext.Connections.First(c => c.Id == connectionId.ToString());
             ShowConnectionDialog(info);
+            await RefreshConfiguration();
         }
 
         private async void CmdSync_OnClick(object sender, RoutedEventArgs e)
@@ -211,14 +210,15 @@ namespace Unicorn.VS.Views
                     var configsString = await response.Content.ReadAsStringAsync();
                     var configs = configsString.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
                     _dataContext.Configurations.Clear();
-                    _dataContext.Configurations.Add(HttpHelper.DefaultConfiguration);
+                    //_dataContext.Configurations.Add(HttpHelper.DefaultConfiguration);
+                    selectedConfig.SelectedIndex = 0;
+                    if (!response.IsSuccessStatusCode)
+                        return;
                     foreach (var config in configs)
                     {
                         _dataContext.Configurations.Add(config);
                     }
-                    selectedConfig.SelectedIndex = 0;
                 }
-
             }
             catch (Exception ex)
             {
