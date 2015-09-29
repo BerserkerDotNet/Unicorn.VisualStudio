@@ -210,7 +210,7 @@ namespace Unicorn.VS.Views
                     var configsString = await response.Content.ReadAsStringAsync();
                     var configs = configsString.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
                     _dataContext.Configurations.Clear();
-                    //_dataContext.Configurations.Add(HttpHelper.DefaultConfiguration);
+                    _dataContext.Configurations.Add(HttpHelper.DefaultConfiguration);
                     selectedConfig.SelectedIndex = 0;
                     if (!response.IsSuccessStatusCode)
                         return;
