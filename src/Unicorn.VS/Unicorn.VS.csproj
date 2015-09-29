@@ -132,6 +132,10 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\MultiSelectComboBox.xaml.cs">
+      <DependentUpon>MultiSelectComboBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Node.cs" />
     <Compile Include="Converters\InversedBooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\OperationTypeToImageSourceConverter.cs" />
     <Compile Include="Converters\OperationTypeToToolTipConverter.cs" />
@@ -249,6 +253,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Controls\MultiSelectComboBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ControlPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
