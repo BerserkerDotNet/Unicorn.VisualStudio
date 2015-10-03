@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace Unicorn.VS.Controls
 {
     public partial class MultiSelectComboBox
     {
+        private const string AllItems = "All";
         private readonly ObservableCollection<Node> _nodeList;
         public MultiSelectComboBox()
         {
@@ -24,7 +26,8 @@ namespace Unicorn.VS.Controls
 
         private static void OnDataSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((MultiSelectComboBox)d).DisplayInControl();
+            var multiSelectComboBox = ((MultiSelectComboBox)d);
+            multiSelectComboBox.DisplayInControl();
         }
 
         public static readonly DependencyProperty SelectedItemsProperty =
@@ -32,7 +35,7 @@ namespace Unicorn.VS.Controls
                 typeof (MultiSelectComboBox), new FrameworkPropertyMetadata(null,
                     OnSelectedItemsChanged));
 
-        public static readonly DependencyProperty SelectedTextProperty = DependencyProperty.Register("SelectedText", typeof(string), typeof(MultiSelectComboBox), new UIPropertyMetadata(string.Empty));
+        public static readonly DependencyProperty SelectedTextProperty = DependencyProperty.Register("SelectedText", typeof(string), typeof(MultiSelectComboBox), new UIPropertyMetadata(AllItems));
 
         public IList<string> DataSource
         {
@@ -60,49 +63,58 @@ namespace Unicorn.VS.Controls
 
         private static void OnSelectedItemsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            MultiSelectComboBox control = (MultiSelectComboBox)d;
+            var control = (MultiSelectComboBox)d;
             control.SelectNodes();
             control.SetText();
         }
 
+        protected override void OnSelectionChanged(SelectionChangedEventArgs e)
+        {
+            base.OnSelectionChanged(e);
+            if (SelectedIndex >= 0 && _nodeList.Count >= SelectedIndex + 1)
+            {
+                _nodeList[SelectedIndex].IsSelected = !_nodeList[SelectedIndex].IsSelected;
+                if (SelectedIndex == 0)
+                    ChangeItemsState(true);
+                else //Skip, if selecting first item, First should be "All"
+                    IndicateThatAllSelected();
+                SetSelectedItems();
+                SetText();
+            }
+            
+        }
+
         private void CheckBox_Click(object sender, RoutedEventArgs e)
         {
-            CheckBox clickedBox = (CheckBox)sender;
-
-            if (clickedBox.Content == "All")
+            var clickedBox = (CheckBox)sender;
+            if (clickedBox.Content != null && clickedBox.Content.Equals(AllItems))
             {
-                if (clickedBox.IsChecked.Value)
-                {
-                    foreach (Node node in _nodeList)
-                    {
-                        node.IsSelected = true;
-                    }
-                }
-                else
-                {
-                    foreach (Node node in _nodeList)
-                    {
-                        node.IsSelected = false;
-                    }
-                }
-
+                var state = clickedBox.IsChecked != null && clickedBox.IsChecked.Value;
+                ChangeItemsState(state);
             }
             else
             {
-                int _selectedCount = 0;
-                foreach (Node s in _nodeList)
-                {
-                    if (s.IsSelected && s.Title != "All")
-                        _selectedCount++;
-                }
-                if (_selectedCount == _nodeList.Count - 1)
-                    _nodeList.FirstOrDefault(i => i.Title == "All").IsSelected = true;
-                else
-                    _nodeList.FirstOrDefault(i => i.Title == "All").IsSelected = false;
+                IndicateThatAllSelected();
             }
             SetSelectedItems();
             SetText();
 
+        }
+
+        private void ChangeItemsState(bool state)
+        {
+            foreach (Node node in _nodeList)
+            {
+                node.IsSelected = state;
+            }
+        }
+
+        private void IndicateThatAllSelected()
+        {
+            var selectedCount = _nodeList.Count(s => s.IsSelected && s.Title != AllItems);
+            var node = _nodeList.FirstOrDefault(i => i.Title == AllItems);
+            if (node != null)
+                node.IsSelected = selectedCount == _nodeList.Count - 1;
         }
 
         private void SelectNodes()
@@ -125,7 +137,7 @@ namespace Unicorn.VS.Controls
             SelectedItems.Clear();
             foreach (Node node in _nodeList)
             {
-                if (node.IsSelected && node.Title != "All")
+                if (node.IsSelected && node.Title != AllItems)
                 {
                     if (DataSource.Count > 0)
                         SelectedItems.Add(node.Title);
@@ -135,31 +147,42 @@ namespace Unicorn.VS.Controls
 
         private void DisplayInControl()
         {
+            if(DataSource is ObservableCollection<string>)
+                ((ObservableCollection<string>)DataSource).CollectionChanged += MultiSelectComboBox_CollectionChanged;
+
+            SyncItems();
+            ItemsSource = _nodeList;
+        }
+
+        private void SyncItems()
+        {
             _nodeList.Clear();
-            if (this.DataSource.Any())
-                _nodeList.Add(new Node("All"));
             foreach (var title in this.DataSource)
             {
-                Node node = new Node(title);
+                var node = new Node(title);
                 _nodeList.Add(node);
             }
-            ItemsSource = _nodeList;
+        }
+
+        private void MultiSelectComboBox_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            SyncItems();
         }
 
         private void SetText()
         {
             if (this.SelectedItems != null)
             {
-                StringBuilder displayText = new StringBuilder();
-                foreach (Node s in _nodeList)
+                var displayText = new StringBuilder();
+                foreach (var s in _nodeList)
                 {
-                    if (s.IsSelected && s.Title == "All")
+                    if (s.IsSelected && s.Title == AllItems)
                     {
                         displayText = new StringBuilder();
-                        displayText.Append("All");
+                        displayText.Append(AllItems);
                         break;
                     }
-                    else if (s.IsSelected && s.Title != "All")
+                    if (s.IsSelected && s.Title != AllItems)
                     {
                         displayText.Append(s.Title);
                         displayText.Append(',');
@@ -167,11 +190,8 @@ namespace Unicorn.VS.Controls
                 }
                 SelectedText = displayText.ToString().TrimEnd(',');
             }
-            // set DefaultText if nothing else selected
             if (string.IsNullOrEmpty(SelectedText))
-            {
-                SelectedText = "None";
-            }
+                SelectedText = AllItems;
         }
     }
 }

@@ -18,7 +18,7 @@ using Unicorn.VS.Types;
 
 namespace Unicorn.VS.Models
 {
-    public class UnicornConnectionViewModel : INotifyPropertyChanged
+    public class UnicornConnectionViewModel : BaseViewModel
     {
 
         private UnicornConnection _connection;
@@ -152,7 +152,7 @@ namespace Unicorn.VS.Models
         private async Task Handshake()
         {
             var endPoint = Connection.Get(HttpHelper.HandshakeCommand).Build();
-            using (var client = new HttpClient())
+            using (var client = Connection.CreateClient())
             {
                 var response = await client.GetAsync(endPoint, CancellationToken.None);
                 _connection.IsUpdateRequired = response.IsUpdateRequired();
@@ -194,15 +194,6 @@ namespace Unicorn.VS.Models
                     IsActive = false;
                 }
             }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            var handler = PropertyChanged;
-            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

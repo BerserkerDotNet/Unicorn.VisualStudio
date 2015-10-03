@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using Unicorn.VS.Data;
 using Unicorn.VS.Models;
 
 namespace Unicorn.VS.Helpers
@@ -49,7 +50,7 @@ namespace Unicorn.VS.Helpers
             if (!endpointUrl.StartsWith("http"))
                 endpointUrl = "http://" + endpointUrl;
             var configuration = GetConfiguration();
-            endpointUrl += "/unicornRemote.aspx?verb=" + _command;
+            endpointUrl += $"{SettingsHelper.GetSettings().EndPoint}?verb={_command}";
             if (!string.IsNullOrEmpty(configuration))
                 endpointUrl += configuration;
             var keys = _additionalKeys.Aggregate(string.Empty,
@@ -67,6 +68,6 @@ namespace Unicorn.VS.Helpers
                 ? string.Empty
                 : "&configuration=" + Uri.EscapeUriString(_configuration));
         }
-        
+
     }
 }

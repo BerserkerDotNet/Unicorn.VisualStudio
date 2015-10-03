@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="841bbcc7-596f-47ea-a223-94dc6d023562" Version="1.2.1" Language="en-US" Publisher="Andrii Snihyr" />
+    <Identity Id="841bbcc7-596f-47ea-a223-94dc6d023562" Version="1.3" Language="en-US" Publisher="Andrii Snihyr" />
     <DisplayName>Unicorn Control Panel</DisplayName>
     <Description>Unicorn control panel for Visual Studio</Description>
     <MoreInfo>https://github.com/BerserkerDotNet/Unicorn.VisualStudio</MoreInfo>

@@ -7,7 +7,7 @@ using Unicorn.VS.Data;
 
 namespace Unicorn.VS.Models
 {
-    public class UnicornConnection : IDataErrorInfo, INotifyPropertyChanged
+    public class UnicornConnection : BaseViewModel, IDataErrorInfo
     {
         private string _error;
         private bool _isUpdateRequired;
@@ -105,15 +105,6 @@ namespace Unicorn.VS.Models
             {
                 _error = value;
             }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            var handler = PropertyChanged;
-            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

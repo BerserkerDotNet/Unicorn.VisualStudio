@@ -1,31 +1,20 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using Unicorn.VS.Annotations;
+﻿using System;
+using Unicorn.VS.Models;
 
 namespace Unicorn.VS.Controls
 {
-    public class Node : INotifyPropertyChanged
+    public class Node : BaseViewModel, IEquatable<Node>
     {
-        private string _title;
+        private readonly string _title;
         private bool _isSelected;
 
         public Node(string title)
         {
-            Title = title;
+            _title = title;
         }
 
-        public string Title
-        {
-            get
-            {
-                return _title;
-            }
-            set
-            {
-                _title = value;
-                OnPropertyChanged();
-            }
-        }
+        public string Title => _title;
+
         public bool IsSelected
         {
             get
@@ -39,13 +28,24 @@ namespace Unicorn.VS.Controls
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        public bool Equals(Node other)
         {
-            var handler = PropertyChanged;
-            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return string.Equals(_title, other._title);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Node)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return _title?.GetHashCode() ?? 0;
         }
     }
 }

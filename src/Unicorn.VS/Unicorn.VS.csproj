@@ -142,9 +142,11 @@
     <Compile Include="Exceptions\MalformedPackageReceivedException.cs" />
     <Compile Include="Helpers\StringExtensions.cs" />
     <Compile Include="Helpers\VersionHelper.cs" />
+    <Compile Include="Models\BaseViewModel.cs" />
     <Compile Include="Models\StatusReport.cs" />
     <Compile Include="Models\UnicornConnection.cs" />
     <Compile Include="Models\UnicornConnectionViewModel.cs" />
+    <Compile Include="Models\UnicornSettings.cs" />
     <Compile Include="Types\DelagateCommand.cs" />
     <Compile Include="Types\MessageLevel.cs" />
     <Compile Include="Types\OperationType.cs" />
@@ -172,6 +174,9 @@
     </Compile>
     <Compile Include="Data\SettingsHelper.cs" />
     <Compile Include="Helpers\UnicornConnectionHelper.cs" />
+    <Compile Include="Views\Settings.xaml.cs">
+      <DependentUpon>Settings.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">
@@ -203,6 +208,8 @@
     <None Include="Resources\Images.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\question_tip.png" />
+    <Resource Include="Resources\settings.png" />
     <Resource Include="Resources\update_required.png" />
     <None Include="Resources\Unicorn.Remote.dll" />
     <Resource Include="Resources\test_connection.png" />
@@ -257,11 +264,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Common.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ControlPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\NewConnection.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Settings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
