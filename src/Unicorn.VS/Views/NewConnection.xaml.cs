@@ -1,16 +1,12 @@
-﻿using System;
-using System.Windows;
-using Microsoft.VisualStudio.PlatformUI;
-using Unicorn.VS.Models;
+﻿using Unicorn.VS.Models;
 
 namespace Unicorn.VS.Views
 {
-    public partial class NewConnection : DialogWindow
+    public partial class NewConnection
     {
         public NewConnection()
         {
             InitializeComponent();
-
             var unicornConnectionViewModel = (DataContext as UnicornConnectionViewModel);
             unicornConnectionViewModel.Close = r =>
             {

@@ -7,15 +7,21 @@
              xmlns:shell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.12.0"
              xmlns:models="clr-namespace:Unicorn.VS.Models"
              xmlns:helpers="clr-namespace:Unicorn.VS.Helpers"
+             xmlns:controls="clr-namespace:Unicorn.VS.Controls"
              Background="{DynamicResource {x:Static shell:VsBrushes.WindowKey}}"
              Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="600"
+             d:DataContext="{d:DesignInstance models:UnicornData, IsDesignTimeCreatable=False}"
              Name="UnicornControlPanel">
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-        <converters:OperationTypeToImageSourceConverter x:Key="OperationTypeToImageSourceConverter"/>
-        <converters:OperationTypeToToolTipConverter x:Key="OperationTypeToToolTipConverter"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Common.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <converters:OperationTypeToImageSourceConverter x:Key="OperationTypeToImageSourceConverter"/>
+            <converters:OperationTypeToToolTipConverter x:Key="OperationTypeToToolTipConverter"/>
+        </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -35,6 +41,7 @@
                 </RowDefinition.Style>
             </RowDefinition>
         </Grid.RowDefinitions>
+        <!--Menu panel-->
         <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="2">
             <Button Margin="0,0,5,0" x:Name="cmdSync" Click="CmdSync_OnClick" Background="Transparent" BorderBrush="Transparent" ToolTip="Synchronize database with disk">
                 <Image Source="../Resources/Live_Sync.png"/>
@@ -43,7 +50,10 @@
                 <Image Source="../Resources/reserialize.png"/>
             </Button>
             <TextBlock Text="Configuration:" VerticalAlignment="Center" Margin="10,0,5,0"/>
-            <ComboBox ItemsSource="{Binding Configurations}" Width="150" SelectedIndex="0" x:Name="selectedConfig"/>
+            <ComboBox ItemsSource="{Binding Configurations}" Width="150" SelectedIndex="0" x:Name="selectedConfig" 
+                      Visibility="{Binding Path=UnicornSettings.AllowMultipleConfigurations, Converter={StaticResource InversedBooleanToVisibilityConverter}}"/>
+            <controls:MultiSelectComboBox DataSource="{Binding Configurations}" Width="150" x:Name="multipleConfigs"
+                                          Visibility="{Binding Path=UnicornSettings.AllowMultipleConfigurations, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <TextBlock Text="Server:" VerticalAlignment="Center" Margin="10,0,5,0"/>
             <ComboBox HorizontalAlignment="Stretch" MinWidth="150" Width="150" x:Name="sitecoreServer" ItemsSource="{Binding Connections}" SelectionChanged="SitecoreServer_OnSelectionChanged">
                 <ComboBox.ItemTemplate>
@@ -67,8 +77,12 @@
             </Button>
             <Button x:Name="cmdRemoveConnection" Click="CmdRemoveConnection_OnClick"  Background="Transparent" BorderBrush="Transparent" ToolTip="Remove connection">
                 <Image Source="../Resources/connection_remove.png"/>
+            </Button> 
+            <Button x:Name="cmdSettings" Click="CmdSettings_OnClick"  Background="Transparent" BorderBrush="Transparent" ToolTip="Settings" Margin="5,0,0,0">
+                <Image Source="../Resources/settings.png"/>
             </Button>
         </StackPanel>
+        <!--Log box-->
         <ListBox helpers:ListBoxExtenders.AutoScrollToEnd="True" Grid.Row="1" ItemsSource="{Binding StatusReports}" Background="{DynamicResource {x:Static shell:VsBrushes.WindowKey}}" 
                  Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}" BorderBrush="{DynamicResource {x:Static shell:VsBrushes.AccentBorderKey}}">
             <ListBox.Resources>

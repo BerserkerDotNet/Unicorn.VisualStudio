@@ -25,32 +25,8 @@ namespace Unicorn.VS.Views
         public ControlPanel()
         {
             InitializeComponent();
-            _dataContext = new UnicornData(new []  {HttpHelper.DefaultConfiguration }, SettingsHelper.GetAllConnections());
+            _dataContext = new UnicornData(new []  {HttpHelper.DefaultConfiguration }, SettingsHelper.GetAllConnections(), SettingsHelper.GetSettings());
             DataContext = _dataContext;
-            //StartLoading();
-            //Task.Run(async () =>
-            //{
-            //    int x = 0;
-            //    while (x < 20)
-            //    {
-            //        x++;
-            //        var x1 = x;
-            //        Dispatcher.Invoke(
-            //            () =>
-            //                _dataContext.StatusReports.Add(new StatusReport("test" + x1, MessageLevel.Info,
-            //                    OperationType.Added)));
-            //        await Task.Delay(100);
-            //    }
-            //    Dispatcher.Invoke(
-            //        StopLoading);
-            //});
-            //_dataContext.StatusReports.Add(new StatusReport("test", MessageLevel.Info, OperationType.Added));
-            //_dataContext.StatusReports.Add(new StatusReport("test", MessageLevel.Error, OperationType.Deleted));
-            //_dataContext.StatusReports.Add(new StatusReport("test", MessageLevel.Info, OperationType.Moved));
-            //_dataContext.StatusReports.Add(new StatusReport("test", MessageLevel.Warning, OperationType.Renamed));
-            //_dataContext.StatusReports.Add(new StatusReport("test", MessageLevel.Info, OperationType.TemplateChanged));
-            //_dataContext.StatusReports.Add(new StatusReport("test", MessageLevel.Debug, OperationType.Updated));
-            //_dataContext.StatusReports.Add(new StatusReport("test", MessageLevel.Info, OperationType.None));
             if (_dataContext.Connections.Any())
                 sitecoreServer.SelectedIndex = 0;
         }
@@ -99,7 +75,7 @@ namespace Unicorn.VS.Views
         private async void CmdReserialize_OnClick(object sender, RoutedEventArgs e)
         {
             _cancellationTokenSource = new CancellationTokenSource();
-            var result = MessageBox.Show(string.Format("Are you sure you want to re-serialize database for {0}?", selectedConfig.Text),
+            var result = MessageBox.Show($"Are you sure you want to re-serialize database for {GetSelectedConfigs()}?",
                 "Reserialization", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result == MessageBoxResult.Yes)
                 await ExecuteJob(HttpHelper.StartReserializeCommand, "Reserialization", _cancellationTokenSource.Token);
@@ -112,6 +88,13 @@ namespace Unicorn.VS.Views
                 MessageBoxImage.Warning);
             if (result == MessageBoxResult.Yes)
                 _cancellationTokenSource.Cancel();
+        }
+
+        private void CmdSettings_OnClick(object sender, RoutedEventArgs e)
+        {
+            var settingsDialog = new Settings(_dataContext.UnicornSettings);
+            if (settingsDialog.ShowModal() == true)
+                SettingsHelper.SaveSettings(_dataContext.UnicornSettings);
         }
 
         private async void SitecoreServer_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -130,10 +113,10 @@ namespace Unicorn.VS.Views
             try
             {
                 var endPoint =  _selectedConnection.Get(command)
-                    .WithConfiguration(selectedConfig.Text)
+                    .WithConfiguration(GetSelectedConfigs())
                     .Build();
 
-                using (var client = new HttpClient())
+                using (var client = _selectedConnection.CreateClient())
                 {
                     client.Timeout = TimeSpan.FromMilliseconds(Timeout.Infinite);
                     var response = await client.GetAsync(endPoint, HttpCompletionOption.ResponseHeadersRead, ct)
@@ -152,6 +135,18 @@ namespace Unicorn.VS.Views
             {
                 Dispatcher.Invoke(StopLoading);
             }
+        }
+
+        private string GetSelectedConfigs()
+        {
+            return _dataContext.UnicornSettings.AllowMultipleConfigurations
+                ? GetMultipleConfigs()
+                : selectedConfig.Text;
+        }
+
+        private string GetMultipleConfigs()
+        {
+            return multipleConfigs.SelectedText.Replace(',', '^');
         }
 
         private async Task RefreshStatus(HttpResponseMessage response, CancellationToken ct)
@@ -203,7 +198,7 @@ namespace Unicorn.VS.Views
                 var endPoint = _selectedConnection.Get(HttpHelper.ConfigCommand)
                     .Build();
 
-                using (var client = new HttpClient())
+                using (var client = _selectedConnection.CreateClient())
                 {
                     var response = await client.GetAsync(endPoint, _cancellationTokenSource.Token);
                     _selectedConnection.IsUpdateRequired = response.IsUpdateRequired();
@@ -211,13 +206,15 @@ namespace Unicorn.VS.Views
                     var configs = configsString.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
                     _dataContext.Configurations.Clear();
                     _dataContext.Configurations.Add(HttpHelper.DefaultConfiguration);
-                    selectedConfig.SelectedIndex = 0;
                     if (!response.IsSuccessStatusCode)
                         return;
                     foreach (var config in configs)
                     {
                         _dataContext.Configurations.Add(config);
                     }
+
+                    selectedConfig.SelectedIndex = 0;
+                    multipleConfigs.SelectedIndex = 0;
                 }
             }
             catch (Exception ex)
@@ -237,7 +234,7 @@ namespace Unicorn.VS.Views
             var newConnection = new NewConnection();
             if (info != null)
                 newConnection.SetData(info);
-            if (newConnection.ShowDialog() == true)
+            if (newConnection.ShowModal() == true)
             {
                 var data = newConnection.DataContext as UnicornConnectionViewModel;
                 var connectionViewModel = data.Connection;
@@ -268,6 +265,7 @@ namespace Unicorn.VS.Views
             cmdReserialize.IsEnabled = isEnabled;
             cmdRemoveConnection.IsEnabled = isEnabled;
             sitecoreServer.IsEnabled = isEnabled;
+            cmdSettings.IsEnabled = isEnabled;
             cmdCancel.IsEnabled = !isEnabled;
         }
 

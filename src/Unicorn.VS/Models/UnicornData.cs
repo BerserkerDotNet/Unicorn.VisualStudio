@@ -1,24 +1,23 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using Unicorn.VS.Annotations;
 
 namespace Unicorn.VS.Models
 {
-    public class UnicornData : INotifyPropertyChanged
+    public class UnicornData : BaseViewModel
     {
         private ObservableCollection<string> _configurations;
         private ObservableCollection<StatusReport> _statusReports;
         private ObservableCollection<UnicornConnection> _connections;
         private int _progress;
         private bool _isIndetermine;
+        private UnicornSettings _unicornSettings;
 
-        public UnicornData(IEnumerable<string> configurations, IEnumerable<UnicornConnection> connections)
+        public UnicornData(IEnumerable<string> configurations, IEnumerable<UnicornConnection> connections, UnicornSettings settings)
         {
             _configurations = new ObservableCollection<string>(configurations);
             _connections = new ObservableCollection<UnicornConnection>(connections);
             StatusReports = new ObservableCollection<StatusReport>();
+            UnicornSettings = settings;
         }
 
         public ObservableCollection<string> Configurations
@@ -74,13 +73,15 @@ namespace Unicorn.VS.Models
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        public UnicornSettings UnicornSettings
         {
-            var handler = PropertyChanged;
-            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+            get { return _unicornSettings; }
+            set
+            {
+                if (Equals(value, _unicornSettings)) return;
+                _unicornSettings = value;
+                OnPropertyChanged();
+            }
         }
     }
 }

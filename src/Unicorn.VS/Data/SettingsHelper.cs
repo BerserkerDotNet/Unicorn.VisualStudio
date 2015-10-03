@@ -10,23 +10,27 @@ namespace Unicorn.VS.Data
 {
     public static class SettingsHelper
     {
-        private const string UnicornConfiguration = @"Unicorn\Connections";
+        private const string SettingsDefaultEndPoint = "/unicornRemote.aspx";
+        private const string UnicornConnectionsRoot = @"Unicorn\Connections";
+        private const string UnicornSettingsRoot = @"Unicorn\Settings";
         private const string ConnectionIdKey = "Id";
         private const string ConnectionNameKey = "Name";
         private const string ConnectionUrlKey = "Url";
-        private const string ConnectioTokenKey = "Token";
+        private const string ConnectionTokenKey = "Token";
+        private const string SettingsEndPointKey = "EndPoint";
+        private const string SettingsAllowMultipleConfigsKey = "AllowMultipleConfigurations";
 
         public static void SaveConnection(UnicornConnection connectionViewModel)
         {
             var store = GetStore();
-            EnsureCollectionExists(UnicornConfiguration);
+            EnsureCollectionExists(UnicornConnectionsRoot);
             var connectionPath = GetConnectionPath(connectionViewModel.Id);
             store.CreateCollection(connectionPath);
             store.SetString(connectionPath, ConnectionIdKey, connectionViewModel.Id);
             store.SetString(connectionPath, ConnectionNameKey, connectionViewModel.Name);
             store.SetString(connectionPath, ConnectionUrlKey, connectionViewModel.ServerUrl);
             if (!string.IsNullOrEmpty(connectionViewModel.Token))
-                store.SetString(connectionPath, ConnectioTokenKey, connectionViewModel.Token);
+                store.SetString(connectionPath, ConnectionTokenKey, connectionViewModel.Token);
         }
 
         public static void DeleteConnection(string id)
@@ -39,7 +43,7 @@ namespace Unicorn.VS.Data
 
         public static UnicornConnection GetConnectionInfo(string id)
         {
-            EnsureCollectionExists(UnicornConfiguration);
+            EnsureCollectionExists(UnicornConnectionsRoot);
             var store = GetStore();
             var connectionPath = GetConnectionPath(id);
             if (!store.CollectionExists(connectionPath))
@@ -50,16 +54,16 @@ namespace Unicorn.VS.Data
                 Id = store.GetString(connectionPath,ConnectionIdKey, string.Empty),
                 Name = store.GetString(connectionPath,ConnectionNameKey, string.Empty),
                 ServerUrl = store.GetString(connectionPath,ConnectionUrlKey, string.Empty),
-                Token = store.GetString(connectionPath,ConnectioTokenKey, string.Empty),
+                Token = store.GetString(connectionPath,ConnectionTokenKey, string.Empty),
             };
             return unicornConnection;
         }
 
         public static IEnumerable<UnicornConnection> GetAllConnections()
         {
-            EnsureCollectionExists(UnicornConfiguration);
+            EnsureCollectionExists(UnicornConnectionsRoot);
             return GetStore()
-                .GetSubCollectionNames(UnicornConfiguration)
+                .GetSubCollectionNames(UnicornConnectionsRoot)
                 .Select(GetConnectionInfo);
         }
 
@@ -70,7 +74,7 @@ namespace Unicorn.VS.Data
 
         private static string GetConnectionPath(string id)
         {
-            return string.Format("{0}\\{1}", UnicornConfiguration, id);
+            return string.Format("{0}\\{1}", UnicornConnectionsRoot, id);
         }
 
         private static void EnsureCollectionExists(string unicornConfiguration)
@@ -84,6 +88,25 @@ namespace Unicorn.VS.Data
         {
             var settingsManager = new ShellSettingsManager(ServiceProvider.GlobalProvider);
             return settingsManager.GetWritableSettingsStore(SettingsScope.UserSettings);
+        }
+
+        public static UnicornSettings GetSettings()
+        {
+            EnsureCollectionExists(UnicornSettingsRoot);
+            var store = GetStore();
+            return new UnicornSettings
+            {
+                AllowMultipleConfigurations = store.GetBoolean(UnicornSettingsRoot, SettingsAllowMultipleConfigsKey,false),
+                EndPoint = store.GetString(UnicornSettingsRoot, SettingsEndPointKey, SettingsDefaultEndPoint)
+            };
+        }
+
+        public static void SaveSettings(UnicornSettings settings)
+        {
+            EnsureCollectionExists(UnicornSettingsRoot);
+            var store = GetStore();
+            store.SetBoolean(UnicornSettingsRoot, SettingsAllowMultipleConfigsKey, settings.AllowMultipleConfigurations);
+            store.SetString(UnicornSettingsRoot, SettingsEndPointKey, settings.EndPoint);
         }
     }
 }
