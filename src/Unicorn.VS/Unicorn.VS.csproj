@@ -281,6 +281,12 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\MicroCHAP\src\MicroCHAP\MicroCHAP.csproj">
+      <Project>{1c702c4b-f5ae-4e32-a6c6-1ef965168229}</Project>
+      <Name>MicroCHAP</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup>
     <UseCodebase>true</UseCodebase>
   </PropertyGroup>

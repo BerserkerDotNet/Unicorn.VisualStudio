@@ -116,7 +116,7 @@ namespace Unicorn.VS.Views
                     .WithConfiguration(GetSelectedConfigs())
                     .Build();
 
-                using (var client = _selectedConnection.CreateClient())
+                using (var client = _selectedConnection.CreateClient(endPoint))
                 {
                     client.Timeout = TimeSpan.FromMilliseconds(Timeout.Infinite);
                     var response = await client.GetAsync(endPoint, HttpCompletionOption.ResponseHeadersRead, ct)
@@ -198,7 +198,7 @@ namespace Unicorn.VS.Views
                 var endPoint = _selectedConnection.Get(HttpHelper.ConfigCommand)
                     .Build();
 
-                using (var client = _selectedConnection.CreateClient())
+                using (var client = _selectedConnection.CreateClient(endPoint))
                 {
                     var response = await client.GetAsync(endPoint, _cancellationTokenSource.Token);
                     _selectedConnection.IsUpdateRequired = response.IsUpdateRequired();

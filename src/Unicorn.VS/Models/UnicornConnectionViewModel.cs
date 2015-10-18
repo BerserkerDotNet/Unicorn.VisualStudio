@@ -152,7 +152,7 @@ namespace Unicorn.VS.Models
         private async Task Handshake()
         {
             var endPoint = Connection.Get(HttpHelper.HandshakeCommand).Build();
-            using (var client = Connection.CreateClient())
+            using (var client = Connection.CreateClient(endPoint))
             {
                 var response = await client.GetAsync(endPoint, CancellationToken.None);
                 _connection.IsUpdateRequired = response.IsUpdateRequired();
