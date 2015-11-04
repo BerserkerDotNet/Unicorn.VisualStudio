@@ -7,15 +7,15 @@
         mc:Ignorable="d"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:platformUi="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.12.0"
+        xmlns:viewModels="clr-namespace:Unicorn.VS.ViewModels"
+        xmlns:interfaces="clr-namespace:Unicorn.VS.ViewModels.Interfaces"
         Title="New Unicorn Connection" Height="280" Width="426" 
         ResizeMode="NoResize" WindowStartupLocation="CenterScreen" 
         Icon="/Unicorn.VS;component/Resources/connection_add.png" 
         ShowInTaskbar="False"
         Background="{DynamicResource {x:Static shell:VsBrushes.WindowKey}}"
-        Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}" IsTabStop="False" IsHitTestVisible="True">
-    <Window.DataContext>
-        <models:UnicornConnectionViewModel/>
-    </Window.DataContext>
+        Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}" IsTabStop="False" IsHitTestVisible="True"
+        d:DataContext="{d:DesignInstance interfaces:IUnicornConnectionViewModel, IsDesignTimeCreatable=false}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -39,16 +39,16 @@
         <Label Grid.Row="0" Grid.Column="0"
                Margin="0,0,5,0" Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}">Connection Name:</Label>
         <TextBox Grid.Row="0" Grid.Column="1" Margin="1" FontSize="14"
-                 Text="{Binding Connection.Name, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+                 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
         <Label Grid.Row="1" Grid.Column="0"
                Margin="0,0,5,0" Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}">Server Url:</Label>
         <TextBox Grid.Row="1" Grid.Column="1" Margin="1" FontSize="14"
-                 Text="{Binding Connection.ServerUrl, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+                 Text="{Binding ServerUrl, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
         <Label Grid.Row="2" Grid.Column="0"
                Margin="0,0,5,0" Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}">Security Token:</Label>
-        <TextBox Grid.Row="2" Grid.Column="1" Margin="1" Text="{Binding Connection.Token}" FontSize="14"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Margin="1" Text="{Binding Token}" FontSize="14"/>
         <StackPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="5">
-            <StackPanel Orientation="Horizontal" Visibility="{Binding Connection.IsUpdateRequired, Converter={StaticResource InversedBooleanToVisibilityConverter}}">
+            <StackPanel Orientation="Horizontal">
                 <Image Source="../Resources/operations/info.png"/>
                 <TextBlock TextWrapping="WrapWithOverflow" FontSize="10" Width="370" Margin="5">
                   NOTE: If debug compilation is enabled, you can connect without auth, otherwise please provide security token. 
@@ -56,18 +56,12 @@
                 <LineBreak/><Bold>Unicorn.Remote is part of Unicorn 3.0, so no installation required.</Bold>
                 </TextBlock>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" Visibility="{Binding Connection.IsUpdateRequired, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Image Source="../Resources/update_required.png"/>
-                <TextBlock TextWrapping="WrapWithOverflow" FontSize="10" Width="370" Margin="5">
-                    WARNING: This connection is running on an old version of the Unicorn.Remote. Update your Unicorn NuGet package for Unicorn 3.0 and above or click update if you running on older versions of Unicorn.
-                </TextBlock>
-            </StackPanel>
         </StackPanel>
         <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" >
             <Button HorizontalAlignment="Left" Margin="7" Padding="2" Command="{Binding Install}">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="../Resources/installer.png" Height="24"/>
-                    <Label Content="{Binding InstallTitle}"/>
+                    <Label Content="Install"/>
                 </StackPanel>
             </Button>
             <TextBlock  TextWrapping="WrapWithOverflow" FontSize="10" Margin="5" Width="308" >
@@ -90,6 +84,6 @@
                 </StackPanel>
             </Button>
         </StackPanel>
-        <ProgressBar Grid.Column="0" Grid.Row="5" IsIndeterminate="True" Margin="15" Visibility="{Binding IsActive, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <ProgressBar Grid.Column="0" Grid.Row="5" IsIndeterminate="True" Margin="15" Visibility="{Binding ShowProgressBar, Converter={StaticResource BooleanToVisibilityConverter}}"/>
     </Grid>
 </platformUi:DialogWindow>

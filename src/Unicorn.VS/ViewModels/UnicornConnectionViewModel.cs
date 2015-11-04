@@ -1,52 +1,73 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
-using Unicorn.VS.Annotations;
 using Unicorn.VS.Data;
 using Unicorn.VS.Helpers;
+using Unicorn.VS.Models;
 using Unicorn.VS.Types;
+using Unicorn.VS.Types.UnicornCommands;
+using Unicorn.VS.ViewModels.Interfaces;
 
-namespace Unicorn.VS.Models
+namespace Unicorn.VS.ViewModels
 {
-    public class UnicornConnectionViewModel : BaseViewModel
+    public class UnicornConnectionViewModel : BaseViewModel, IDataErrorInfo, IUnicornConnectionViewModel
     {
+        private readonly UnicornConnection _connection;
+        private bool _showProgressBar;
 
-        private UnicornConnection _connection;
-        private bool _isActive;
-
-        public UnicornConnectionViewModel()
+        public UnicornConnectionViewModel(UnicornConnection connection)
         {
-            _connection = new UnicornConnection();
-            TestConnection = new DelagateCommand(ExecuteTestConnection, () => !IsActive);
-            Save = new DelagateCommand(ExecuteSave, () => !IsActive);
-            Install = new DelagateCommand(ExecuteInstall, () => !IsActive);
-            DownloadPackage = new DelagateCommand(ExecuteDownloadPackage, () => !IsActive);
+            _connection = connection;
+            TestConnection = new Command(ExecuteTestConnection, () => !ShowProgressBar);
+            Save = new Command(ExecuteSave, () => !ShowProgressBar);
+            Install = new Command(ExecuteInstall, () => !ShowProgressBar);
+            DownloadPackage = new Command(ExecuteDownloadPackage, () => !ShowProgressBar);
         }
 
-        public UnicornConnection Connection
+        public string Id { get; set; }
+
+        public string Name
         {
-            get { return _connection; }
-            set { _connection = value;
+            get { return _connection.Name; }
+            set
+            {
+                _connection.Name = value;
                 OnPropertyChanged();
             }
         }
 
-        public bool IsActive
+        public string ServerUrl
         {
-            get { return _isActive; }
+            get { return _connection.ServerUrl; }
             set
             {
-                _isActive = value;
+                _connection.ServerUrl = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string Token
+        {
+            get { return _connection.Token; }
+            set
+            {
+                _connection.Token = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool ShowProgressBar
+        {
+            get { return _showProgressBar; }
+            set
+            {
+                _showProgressBar = value;
                 OnPropertyChanged();
             }
         }
@@ -61,19 +82,48 @@ namespace Unicorn.VS.Models
 
         public Action<bool> Close { get; set; }
 
-        public string InstallTitle => Connection.IsUpdateRequired ? "Update" : "Install";
-
-        public void SetData(UnicornConnection data)
+        public string this[string columnName]
         {
-            Connection = data; 
-            OnPropertyChanged("InstallTitle");
+            get
+            {
+                string result = null;
+                if (columnName == nameof(Name))
+                    result = ValidateName();
+
+                if (columnName == nameof(ServerUrl))
+                    result = ValidateServerUrl();
+
+                Error = result;
+                return result;
+            }
         }
+
+        private string ValidateServerUrl()
+        {
+            if (string.IsNullOrEmpty(ServerUrl))
+                return "Server Url is required.";
+            Uri uri;
+            if (!Uri.TryCreate(ServerUrl, UriKind.Absolute, out uri))
+                return ServerUrl + " - is invalid URL. Url must be absolute. For example http://localsitecore";
+            return null;
+        }
+
+        private string ValidateName()
+        {
+            if (string.IsNullOrEmpty(Name))
+                return "Name is required.";
+            if (SettingsHelper.IsConnectionExists(Name))
+                return $"Connection with name \"{Name}\" already exists";
+            return null;
+        }
+
+        public string Error { get; private set; }
 
         private async void ExecuteTestConnection()
         {
             try
             {
-                IsActive = true;
+                ShowProgressBar = true;
                 await Handshake();
             }
             catch(Exception ex)
@@ -83,14 +133,18 @@ namespace Unicorn.VS.Models
             }
             finally
             {
-                IsActive = false;
+                ShowProgressBar = false;
             }
         }
 
         private void ExecuteSave()
         {
-            if (string.IsNullOrEmpty(Connection.Error))
+            if (string.IsNullOrEmpty(Error))
+            {
+                SettingsHelper.SaveConnection(_connection);
                 Close(true);
+            }
+            
         }
 
         private async void ExecuteInstall()
@@ -101,7 +155,7 @@ namespace Unicorn.VS.Models
                 {
                     if (folderBrowser.ShowDialog() != DialogResult.OK)
                         return;
-                    IsActive = true;
+                    ShowProgressBar = true;
                     var binPath = Path.Combine(folderBrowser.SelectedPath, "bin");
                     var configPath = Path.Combine(folderBrowser.SelectedPath, "App_Config\\Include");
                     if (!Directory.Exists(binPath))
@@ -144,25 +198,18 @@ namespace Unicorn.VS.Models
                 }
                 finally
                 {
-                    IsActive = false;
+                    ShowProgressBar = false;
                 }
             }
         }
 
         private async Task Handshake()
         {
-            var endPoint = Connection.Get(HttpHelper.HandshakeCommand).Build();
-            using (var client = Connection.CreateClient(endPoint))
-            {
-                var response = await client.GetAsync(endPoint, CancellationToken.None);
-                _connection.IsUpdateRequired = response.IsUpdateRequired();
-                if (response.IsSuccessStatusCode)
-                    MessageBox.Show("All good!", "Connection test", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                else
-                    MessageBox.Show("Ooops..." + response.ReasonPhrase, "Connection test", MessageBoxButtons.OK,
-                        MessageBoxIcon.Exclamation);
-
-            }
+            var isSuccess = await UnicornCommandsManager.Execute(new HandshakeCommand(_connection, CancellationToken.None));
+            if (isSuccess)
+                MessageBox.Show("All good!", "Connection test", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            else
+                MessageBox.Show("Ooops...Something went wrong.", "Connection test", MessageBoxButtons.OK,  MessageBoxIcon.Exclamation);
         }
 
         private void ExecuteDownloadPackage()
@@ -171,7 +218,7 @@ namespace Unicorn.VS.Models
             {
                 try
                 {
-                    IsActive = true;
+                    ShowProgressBar = true;
                     saveFileDialog.FileName = $"UnicornRemote-{VersionHelper.SupportedClientVersion}.zip";
                     saveFileDialog.DefaultExt = ".zip";
                     if (saveFileDialog.ShowDialog() != DialogResult.OK)
@@ -191,7 +238,7 @@ namespace Unicorn.VS.Models
                 }
                 finally
                 {
-                    IsActive = false;
+                    ShowProgressBar = false;
                 }
             }
         }

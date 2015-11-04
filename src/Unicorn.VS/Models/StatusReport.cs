@@ -1,6 +1,6 @@
 using System;
-using Unicorn.Remote.Logging;
 using Unicorn.VS.Types;
+using Unicorn.VS.Types.Logging;
 
 namespace Unicorn.VS.Models
 {

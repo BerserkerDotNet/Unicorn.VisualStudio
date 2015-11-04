@@ -136,21 +136,44 @@
       <DependentUpon>MultiSelectComboBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Node.cs" />
+    <Compile Include="Converters\InversedBooleanConverter.cs" />
     <Compile Include="Converters\InversedBooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\OperationTypeToImageSourceConverter.cs" />
     <Compile Include="Converters\OperationTypeToToolTipConverter.cs" />
     <Compile Include="Exceptions\MalformedPackageReceivedException.cs" />
     <Compile Include="Helpers\StringExtensions.cs" />
     <Compile Include="Helpers\VersionHelper.cs" />
-    <Compile Include="Models\BaseViewModel.cs" />
+    <Compile Include="Types\UnicornCommandHandlers\BaseDatabaseCommandHandler.cs" />
+    <Compile Include="Types\UnicornCommandHandlers\HandshakeCommandHandler.cs" />
+    <Compile Include="Types\UnicornCommandHandlers\LegacyReserializeCommandHandler.cs" />
+    <Compile Include="Types\UnicornCommandHandlers\LegacySynchronizeCommandHandler.cs" />
+    <Compile Include="Types\UnicornCommands\BaseDatabaseCommand.cs" />
+    <Compile Include="Types\UnicornCommands\BaseUnicornCommand.cs" />
+    <Compile Include="Types\UnicornCommandHandlers\BaseUnicornCommandHandler.cs" />
+    <Compile Include="Types\Interfaces\IUnicornCommand.cs" />
+    <Compile Include="Types\Interfaces\IUnicornCommandHandler.cs" />
+    <Compile Include="Types\Exceptions\CommandHandlerNotFoundException.cs" />
+    <Compile Include="Types\UnicornCommands\HandshakeCommand.cs" />
+    <Compile Include="Types\UnicornCommands\LegacyConfigurationsCommand.cs" />
+    <Compile Include="Types\UnicornCommandHandlers\LegacyConfigurationsCommandHandler.cs" />
+    <Compile Include="Types\UnicornCommands\LegacyReserializeCommand.cs" />
+    <Compile Include="Types\UnicornCommands\LegacySynchronizeCommand.cs" />
+    <Compile Include="Types\UnicornCommands\UnicornCommandsManager.cs" />
+    <Compile Include="Types\UnitType.cs" />
+    <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="Models\StatusReport.cs" />
     <Compile Include="Models\UnicornConnection.cs" />
-    <Compile Include="Models\UnicornConnectionViewModel.cs" />
+    <Compile Include="ViewModels\Interfaces\IControlPanelViewModel.cs" />
+    <Compile Include="ViewModels\Interfaces\IUnicornConnectionViewModel.cs" />
+    <Compile Include="ViewModels\Interfaces\IUnicornSettingsViewModel.cs" />
+    <Compile Include="ViewModels\UnicornControlPanelViewModel.cs" />
+    <Compile Include="ViewModels\UnicornConnectionViewModel.cs" />
     <Compile Include="Models\UnicornSettings.cs" />
-    <Compile Include="Types\DelagateCommand.cs" />
-    <Compile Include="Types\MessageLevel.cs" />
-    <Compile Include="Types\OperationType.cs" />
-    <Compile Include="Types\ReportType.cs" />
+    <Compile Include="Types\Command.cs" />
+    <Compile Include="Types\Logging\MessageLevel.cs" />
+    <Compile Include="Types\Logging\OperationType.cs" />
+    <Compile Include="Types\Logging\ReportType.cs" />
+    <Compile Include="ViewModels\UnicornSettingsViewModel.cs" />
     <Compile Include="Views\ControlPanel.xaml.cs">
       <DependentUpon>ControlPanel.xaml</DependentUpon>
     </Compile>
@@ -166,14 +189,11 @@
     <Compile Include="Unicorn.VSPackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PkgCmdID.cs" />
-    <Compile Include="Models\UnicornData.cs" />
-    <Compile Include="Helpers\HttpHelper.cs" />
     <Compile Include="Helpers\ListBoxExtenders.cs" />
     <Compile Include="Views\NewConnection.xaml.cs">
       <DependentUpon>NewConnection.xaml</DependentUpon>
     </Compile>
     <Compile Include="Data\SettingsHelper.cs" />
-    <Compile Include="Helpers\UnicornConnectionHelper.cs" />
     <Compile Include="Views\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>
@@ -287,6 +307,7 @@
       <Name>MicroCHAP</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <UseCodebase>true</UseCodebase>
   </PropertyGroup>

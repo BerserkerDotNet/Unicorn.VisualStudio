@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:platformUi="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.12.0"
+                         xmlns:interfaces="clr-namespace:Unicorn.VS.ViewModels.Interfaces"
         Title="Unicorn Control Panel Settings" 
         Height="150" 
         Width="300" 
@@ -15,7 +16,7 @@
         ShowInTaskbar="False"
         Background="{DynamicResource {x:Static shell:VsBrushes.WindowKey}}"
         Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}" IsTabStop="False" IsHitTestVisible="True"
-        d:DataContext="{d:DesignInstance models:UnicornSettings, IsDesignTimeCreatable=True}">
+        d:DataContext="{d:DesignInstance interfaces:IUnicornSettingsViewModel, IsDesignTimeCreatable=false}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

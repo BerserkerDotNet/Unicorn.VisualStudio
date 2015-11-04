@@ -1,25 +1,27 @@
 ﻿using Unicorn.VS.Models;
+using Unicorn.VS.ViewModels;
 
 namespace Unicorn.VS.Views
 {
     public partial class NewConnection
     {
         public NewConnection()
+            :this(new UnicornConnection())
+        {
+
+        }
+
+        public NewConnection(UnicornConnection data)
         {
             InitializeComponent();
-            var unicornConnectionViewModel = (DataContext as UnicornConnectionViewModel);
+            var unicornConnectionViewModel = new UnicornConnectionViewModel(data ?? new UnicornConnection());
             unicornConnectionViewModel.Close = r =>
             {
                 DialogResult = r;
                 Close();
             };
-        }
+            DataContext = unicornConnectionViewModel;
 
-        public void SetData(UnicornConnection data)
-        {
-            if (data != null)
-                Title = "Update Unicorn Connection";
-            (DataContext as UnicornConnectionViewModel).SetData(data);
         }
     }
 }

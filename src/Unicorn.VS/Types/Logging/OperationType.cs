@@ -1,4 +1,4 @@
-namespace Unicorn.VS.Types
+namespace Unicorn.VS.Types.Logging
 {
     public enum OperationType
     {

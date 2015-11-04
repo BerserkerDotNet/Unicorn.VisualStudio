@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 using Unicorn.VS.Types;
+using Unicorn.VS.Types.Logging;
 
 namespace Unicorn.VS.Converters
 {

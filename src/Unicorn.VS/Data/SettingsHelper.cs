@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Settings;
 using Unicorn.VS.Models;
+using Unicorn.VS.ViewModels;
 
 namespace Unicorn.VS.Data
 {

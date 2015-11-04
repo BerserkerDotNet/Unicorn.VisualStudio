@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Unicorn.VS.Annotations;
 
-namespace Unicorn.VS.Models
+namespace Unicorn.VS.ViewModels
 {
     public abstract class BaseViewModel:INotifyPropertyChanged
     {

@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
 using System.Text;
-using Unicorn.Remote.Logging;
 using Unicorn.VS.Exceptions;
 using Unicorn.VS.Models;
 using Unicorn.VS.Types;
+using Unicorn.VS.Types.Logging;
 
 namespace Unicorn.VS.Helpers
 {

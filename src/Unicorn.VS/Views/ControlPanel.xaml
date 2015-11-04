@@ -8,11 +8,12 @@
              xmlns:models="clr-namespace:Unicorn.VS.Models"
              xmlns:helpers="clr-namespace:Unicorn.VS.Helpers"
              xmlns:controls="clr-namespace:Unicorn.VS.Controls"
+             xmlns:viewModels="clr-namespace:Unicorn.VS.ViewModels"
              Background="{DynamicResource {x:Static shell:VsBrushes.WindowKey}}"
              Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="600"
-             d:DataContext="{d:DesignInstance models:UnicornData, IsDesignTimeCreatable=False}"
+             d:DataContext="{d:DesignInstance viewModels:UnicornControlPanelViewModel, IsDesignTimeCreatable=False}"
              Name="UnicornControlPanel">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -21,6 +22,7 @@
             </ResourceDictionary.MergedDictionaries>
             <converters:OperationTypeToImageSourceConverter x:Key="OperationTypeToImageSourceConverter"/>
             <converters:OperationTypeToToolTipConverter x:Key="OperationTypeToToolTipConverter"/>
+            <converters:InversedBooleanConverter x:Key="InversedBooleanConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -43,28 +45,45 @@
         </Grid.RowDefinitions>
         <!--Menu panel-->
         <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="2">
-            <Button Margin="0,0,5,0" x:Name="cmdSync" Click="CmdSync_OnClick" Background="Transparent" BorderBrush="Transparent" ToolTip="Synchronize database with disk">
+            <Button Margin="0,0,5,0"
+                    Background="Transparent" 
+                    BorderBrush="Transparent" 
+                    ToolTip="Synchronize database with disk" 
+                    Command="{Binding Synchronize}"
+                    IsEnabled="{Binding IsLoadingStarted, Converter={StaticResource InversedBooleanConverter}}">
                 <Image Source="../Resources/Live_Sync.png"/>
             </Button>
-            <Button Margin="0,0,5,0" x:Name="cmdReserialize" Click="CmdReserialize_OnClick" Background="Transparent" BorderBrush="Transparent" ToolTip="Reserialize database on disk">
+            <Button Margin="0,0,5,0" Background="Transparent" BorderBrush="Transparent" ToolTip="Reserialize database on disk"
+                    Command="{Binding Reserialize}"
+                    IsEnabled="{Binding IsLoadingStarted, Converter={StaticResource InversedBooleanConverter}}">
                 <Image Source="../Resources/reserialize.png"/>
             </Button>
             <TextBlock Text="Configuration:" VerticalAlignment="Center" Margin="10,0,5,0"/>
-            <ComboBox ItemsSource="{Binding Configurations}" Width="150" SelectedIndex="0" x:Name="selectedConfig" 
-                      Visibility="{Binding Path=UnicornSettings.AllowMultipleConfigurations, Converter={StaticResource InversedBooleanToVisibilityConverter}}"/>
-            <controls:MultiSelectComboBox DataSource="{Binding Configurations}" Width="150" x:Name="multipleConfigs"
-                                          Visibility="{Binding Path=UnicornSettings.AllowMultipleConfigurations, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <ComboBox ItemsSource="{Binding Configurations}" Width="150" 
+                      SelectedIndex="{Binding SelectedConfigurationIndex, Mode=TwoWay}"
+                      SelectedItem="{Binding SelectedConfigurations}"
+                      Visibility="{Binding Path=AllowMultipleConfigurations, Converter={StaticResource InversedBooleanToVisibilityConverter}}"
+                      IsEnabled="{Binding IsLoadingStarted, Converter={StaticResource InversedBooleanConverter}}"/>
+            <controls:MultiSelectComboBox DataSource="{Binding Configurations}" Width="150"
+                                          Visibility="{Binding Path=AllowMultipleConfigurations, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                          IsEnabled="{Binding IsLoadingStarted, Converter={StaticResource InversedBooleanConverter}}"
+                                          SelectedText="{Binding SelectedConfigurations}"
+                                          SelectedIndex="{Binding SelectedConfigurationIndex}"/>
             <TextBlock Text="Server:" VerticalAlignment="Center" Margin="10,0,5,0"/>
-            <ComboBox HorizontalAlignment="Stretch" MinWidth="150" Width="150" x:Name="sitecoreServer" ItemsSource="{Binding Connections}" SelectionChanged="SitecoreServer_OnSelectionChanged">
+            <ComboBox HorizontalAlignment="Stretch" MinWidth="150" Width="150" x:Name="sitecoreServer" 
+                      ItemsSource="{Binding Connections}" 
+                      SelectedItem="{Binding SelectedConnection}"
+                      SelectedIndex="{Binding SelectedConnectionIndex, Mode=TwoWay}"
+                      IsEnabled="{Binding IsLoadingStarted, Converter={StaticResource InversedBooleanConverter}}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate DataType="models:UnicornConnection">
                         <Grid HorizontalAlignment="Stretch" Width="140">
                             <TextBlock Text="{Binding Name}" HorizontalAlignment="Stretch" />
-                            <Button Tag="{Binding Id}" Click="CmdEditConnection_OnClick" BorderThickness="0" 
+                            <Button Tag="{Binding Id}" BorderThickness="0" 
+                                    Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ComboBox}}, Path=DataContext.EditSelectedConnection}"
+                                    CommandParameter="{Binding Id}"
                                     Background="Transparent" HorizontalAlignment="Right" ToolTip="Edit connection">
                                 <StackPanel Orientation="Horizontal">
-                                    <Image Source="../Resources/update_required.png" Height="16" Width="16" 
-                                           Visibility="{Binding IsUpdateRequired, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                     <Image Source="../Resources/connection_edit.png" Height="16" Width="16"/>
                                 </StackPanel>
                             </Button>
@@ -72,13 +91,22 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <Button x:Name="cmdNewConnection" Click="CmdNewConnection_OnClick"  Background="Transparent" BorderBrush="Transparent" ToolTip="Create new connection">
+            <Button 
+                    Command="{Binding CreateNewConnection}"
+                    Background="Transparent" BorderBrush="Transparent" ToolTip="Create new connection"
+                    IsEnabled="{Binding IsLoadingStarted, Converter={StaticResource InversedBooleanConverter}}">
                 <Image Source="../Resources/connection_add.png"/>
             </Button>
-            <Button x:Name="cmdRemoveConnection" Click="CmdRemoveConnection_OnClick"  Background="Transparent" BorderBrush="Transparent" ToolTip="Remove connection">
+            <Button 
+                    Command="{Binding RemoveSelectedConnection}"
+                    Background="Transparent" BorderBrush="Transparent" ToolTip="Remove connection"
+                    IsEnabled="{Binding IsLoadingStarted, Converter={StaticResource InversedBooleanConverter}}">
                 <Image Source="../Resources/connection_remove.png"/>
             </Button> 
-            <Button x:Name="cmdSettings" Click="CmdSettings_OnClick"  Background="Transparent" BorderBrush="Transparent" ToolTip="Settings" Margin="5,0,0,0">
+            <Button 
+                    Command="{Binding ShowSettings}"
+                    Background="Transparent" BorderBrush="Transparent" ToolTip="Settings" Margin="5,0,0,0"
+                    IsEnabled="{Binding IsLoadingStarted, Converter={StaticResource InversedBooleanConverter}}">
                 <Image Source="../Resources/settings.png"/>
             </Button>
         </StackPanel>
@@ -116,15 +144,18 @@
                      HorizontalAlignment="Stretch"
                      VerticalAlignment="Bottom"
                      Height="25" 
-                     x:Name="loadingBar" Visibility="Collapsed"/>
+                     x:Name="loadingBar" 
+                     Visibility="{Binding IsLoadingStarted, Converter={StaticResource BooleanToVisibilityConverter}}"/>
         <TextBlock Grid.Row="2"                       
                    HorizontalAlignment="Center"
                    VerticalAlignment="Bottom"
                    Margin="0,0,0,5" Text="Loading..."
                    Foreground="Black"
-                   x:Name="loadingBlock" Visibility="Collapsed" />
-        <Button x:Name="cmdCancel" Grid.Row="2" Background="{Binding ElementName=loadingBar, Path=Background}" 
-                HorizontalAlignment="Right" Click="CmdCancel_OnClick" Visibility="Collapsed" IsCancel="True">
+                   x:Name="loadingBlock" 
+                   Visibility="{Binding IsLoadingStarted, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <Button Grid.Row="2" Background="{Binding ElementName=loadingBar, Path=Background}" 
+                HorizontalAlignment="Right" IsCancel="True" Command="{Binding CancelCurrentJob}"
+                Visibility="{Binding IsLoadingStarted, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel Orientation="Horizontal">
                 <Image Source="../Resources/cancel.png"/>
                 <TextBlock VerticalAlignment="Center" Margin="2">Cancel</TextBlock>

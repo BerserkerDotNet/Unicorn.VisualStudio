@@ -1,5 +1,6 @@
 ﻿using System;
 using Unicorn.VS.Models;
+using Unicorn.VS.ViewModels;
 
 namespace Unicorn.VS.Controls
 {
