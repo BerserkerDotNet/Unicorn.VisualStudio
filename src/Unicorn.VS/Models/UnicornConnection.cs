@@ -18,6 +18,8 @@ namespace Unicorn.VS.Models
 
         public string Token { get; set; }
 
+        public bool IsLegacy { get; set; }
+
         public bool Equals(UnicornConnection other)
         {
             if (ReferenceEquals(null, other)) return false;

@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
+using Microsoft.VisualStudio.Shell.Interop;
 using Unicorn.VS.Data;
 using Unicorn.VS.Helpers;
 using Unicorn.VS.Models;
@@ -205,6 +206,7 @@ namespace Unicorn.VS.ViewModels
 
         private async Task Handshake()
         {
+            _connection.IsLegacy = await UnicornCommandsManager.Execute(new IsLegacyCommand(_connection));
             var isSuccess = await UnicornCommandsManager.Execute(new HandshakeCommand(_connection, CancellationToken.None));
             if (isSuccess)
                 MessageBox.Show("All good!", "Connection test", MessageBoxButtons.OK, MessageBoxIcon.Information);

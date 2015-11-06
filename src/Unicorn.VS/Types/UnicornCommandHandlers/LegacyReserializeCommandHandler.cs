@@ -1,10 +1,12 @@
+using Unicorn.VS.Models;
+
 namespace Unicorn.VS.Types.UnicornCommandHandlers
 {
-    public class LegacyReserializeCommandHandler : BaseDatabaseCommandHandler
+    public class LegacyReserializeCommandHandler : BaseReportableCommandHandler
     {
-        public LegacyReserializeCommandHandler() 
-            : base("Reserialize")
+        protected override string GetVerb(UnicornConnection connection)
         {
+            return connection.IsLegacy ? "Reserialize" : "VSReserialize";
         }
     }
 }

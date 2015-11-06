@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Microsoft.VisualStudio.Shell.Interop;
 using Unicorn.VS.Data;
 using Unicorn.VS.Helpers;
 using Unicorn.VS.Models;
@@ -15,6 +16,8 @@ using Unicorn.VS.Types.UnicornCommandHandlers;
 using Unicorn.VS.Types.UnicornCommands;
 using Unicorn.VS.ViewModels.Interfaces;
 using Unicorn.VS.Views;
+using Command = Unicorn.VS.Types.Command;
+using Package = Microsoft.VisualStudio.Shell.Package;
 
 namespace Unicorn.VS.ViewModels
 {
@@ -33,6 +36,7 @@ namespace Unicorn.VS.ViewModels
         private string _selectedConfigurations;
         private int _selectedConfigurationIndex;
         private CancellationTokenSource _cancellationTokenSource;
+        private IVsStatusbar _bar;
 
         public UnicornControlPanelViewModel(Dispatcher dispatcher)
         {
@@ -230,15 +234,18 @@ namespace Unicorn.VS.ViewModels
                     MessageBoxImage.Exclamation);
                 return;
             }
-           
+            SetStatusBarText($"Synchronizing {SelectedConnection.Name}");
             await ExecuteSafe(async t =>
             {
                 ResetState();
-                var legacySynchronizeCommand = new LegacySynchronizeCommand(SelectedConnection, SelectedConfigurations, t, s => _dispatcher.Invoke(() => RefreshStatus(s)));
-                await UnicornCommandsManager.Execute(legacySynchronizeCommand)
-                    .ConfigureAwait(false);
-            }).ConfigureAwait(false);
-
+                using (var progressContext = new ProgressContext(StatusBar, "Synchronizing"))
+                {
+                    var legacySynchronizeCommand = new LegacySynchronizeCommand(SelectedConnection,
+                        SelectedConfigurations, t, s => _dispatcher.Invoke(() => RefreshStatus(s, progressContext)));
+                    await UnicornCommandsManager.Execute(legacySynchronizeCommand).ConfigureAwait(false);
+                }
+            },"Synchronization complete", "Synchronization failed").ConfigureAwait(false);
+            
         }
 
         private async void ExecuteReserialize()
@@ -252,10 +259,14 @@ namespace Unicorn.VS.ViewModels
             await ExecuteSafe(async t =>
             {
                 ResetState();
-                var legacySynchronizeCommand = new LegacyReserializeCommand(SelectedConnection, SelectedConfigurations, t, s => _dispatcher.Invoke(() => RefreshStatus(s)));
-                await UnicornCommandsManager.Execute(legacySynchronizeCommand)
-                    .ConfigureAwait(false);
-            }).ConfigureAwait(false);
+                using (var progressContext = new ProgressContext(StatusBar, "Serializing"))
+                {
+                    var legacySynchronizeCommand = new LegacyReserializeCommand(SelectedConnection,
+                        SelectedConfigurations, t, s => _dispatcher.Invoke(() => RefreshStatus(s, progressContext)));
+                    await UnicornCommandsManager.Execute(legacySynchronizeCommand)
+                        .ConfigureAwait(false);
+                }
+            }, $"{SelectedConnection} serialized", "Serialization failed").ConfigureAwait(false);
         }
 
         private void ShowConnectionDialog(UnicornConnection info = null)
@@ -279,32 +290,49 @@ namespace Unicorn.VS.ViewModels
             if (SelectedConnection == null)
                 return;
 
+            SetStatusBarText("Connecting to Unicorn...");
+            await RefreshConnectionState();
             await ExecuteSafe(async t =>
             {
+                
                 IsIndetermine = true;
                 SelectedConfigurations = string.Empty;
                 Configurations.Clear();
                 Configurations.Add(DefaultConfiguration);
 
-                var configs = await UnicornCommandsManager.Execute(new LegacyConfigurationsCommand(SelectedConnection, t));
+                var configs = await UnicornCommandsManager.Execute(new ConfigurationsCommand(SelectedConnection, t));
                 foreach (var config in configs)
                 {
                     Configurations.Add(config);
                 }
                 SelectedConfigurationIndex = 0;
-            }).ConfigureAwait(false);
+            }, $"Connected to {SelectedConnection.Name}", $"{SelectedConnection.Name} failed to connect").ConfigureAwait(false);
         }
 
-        private async Task ExecuteSafe(Func<CancellationToken, Task> stuff)
+        private async Task RefreshConnectionState()
+        {
+            if (SelectedConnection == null)
+                return;
+
+            await ExecuteSafe(async t =>
+            {
+                IsIndetermine = true;
+                SelectedConnection.IsLegacy = await UnicornCommandsManager.Execute(new IsLegacyCommand(SelectedConnection, t));
+            }, "Connecting to Unicorn...", "Failed to read Unicorn version");
+        }
+
+        private async Task ExecuteSafe(Func<CancellationToken, Task> stuff, string statusBarOkText, string statusBarFailText)
         {
             IsLoadingStarted = true;
             try
             {
                 _cancellationTokenSource = new CancellationTokenSource();
                 await stuff(_cancellationTokenSource.Token).ConfigureAwait(false);
+                SetStatusBarText(statusBarOkText);
             }
             catch (Exception ex)
             {
+                SetStatusBarText(statusBarFailText);
                 var msg = $"Error while executing operation on server '{_selectedConnection.Name}': {ex.Message}";
                 MessageBox.Show(msg, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -321,12 +349,15 @@ namespace Unicorn.VS.ViewModels
             IsIndetermine = false;
         }
 
-        private void RefreshStatus(StatusReport report)
+        private void RefreshStatus(StatusReport report, ProgressContext progressContext)
         {
             try
             {
                 if (report.IsProgressReport())
+                {
                     Progress = int.Parse(report.Message);
+                    progressContext.SetProgress((uint)Progress);
+                }
                 else
                     StatusReports.Add(report);
             }
@@ -337,5 +368,43 @@ namespace Unicorn.VS.ViewModels
             }
         }
 
+        private IVsStatusbar StatusBar => _bar ?? (_bar = Package.GetGlobalService(typeof(SVsStatusbar)) as IVsStatusbar);
+
+        private void SetStatusBarText(string text)
+        {
+            int frozen;
+            StatusBar.IsFrozen(out frozen);
+            if (frozen == 0)
+            {
+                StatusBar.SetText(text);
+            }
+        }
+
+    }
+
+    public class ProgressContext : IDisposable
+    {
+        private readonly IVsStatusbar _statusbar;
+        private readonly string _operationText;
+        uint _cookie = 0;
+
+        public ProgressContext(IVsStatusbar statusbar, string operationText)
+        {
+            _statusbar = statusbar;
+            _operationText = operationText;
+            _statusbar.Progress(ref _cookie, 1, operationText, 0, 0);
+        }
+
+        public void SetProgress(uint progress)
+        {
+            _statusbar.Progress(ref _cookie, 1, $"{_operationText} {progress}%", progress, 100);
+        }
+
+        public void Dispose()
+        {
+            _statusbar.Progress(ref _cookie, 0, "", 0, 0);
+            _statusbar.FreezeOutput(0);
+            _statusbar.Clear();
+        }
     }
 }

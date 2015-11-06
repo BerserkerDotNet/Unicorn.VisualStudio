@@ -12,10 +12,11 @@ namespace Unicorn.VS.Types.UnicornCommands
     {
         static UnicornCommandsManager()
         {
-            Register<LegacyConfigurationsCommand>(new LegacyConfigurationsCommandHandler());
+            Register<ConfigurationsCommand>(new ConfigurationsCommandHandler());
             Register<LegacySynchronizeCommand>(new LegacySynchronizeCommandHandler());
             Register<LegacyReserializeCommand>(new LegacyReserializeCommandHandler());
             Register<HandshakeCommand>(new HandshakeCommandHandler());
+            Register<IsLegacyCommand>(new IsLegacyCommandHandler());
         }
 
         private static Dictionary<Type, object> _commandHandlers = new Dictionary<Type, object>(5);

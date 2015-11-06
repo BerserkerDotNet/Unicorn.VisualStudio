@@ -4,9 +4,9 @@ using Unicorn.VS.Models;
 
 namespace Unicorn.VS.Types.UnicornCommands
 {
-    public abstract class BaseDatabaseCommand : BaseUnicornCommand<UnitType>
+    public abstract class BaseReportableCommand : BaseUnicornCommand<UnitType>
     {
-        protected BaseDatabaseCommand(UnicornConnection connection, string selectedConfigs, CancellationToken token, Action<StatusReport> reportHandler) 
+        protected BaseReportableCommand(UnicornConnection connection, string selectedConfigs, CancellationToken token, Action<StatusReport> reportHandler) 
             : base(connection, selectedConfigs, token)
         {
             ReportHandler = reportHandler;

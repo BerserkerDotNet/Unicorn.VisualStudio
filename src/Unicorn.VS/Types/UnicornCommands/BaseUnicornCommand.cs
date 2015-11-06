@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using Unicorn.VS.Helpers;
 using Unicorn.VS.Models;
 using Unicorn.VS.Types.Interfaces;
@@ -35,6 +36,11 @@ namespace Unicorn.VS.Types.UnicornCommands
         public string SelectedConfigurations { get; }
         public UnicornConnection Connection { get;  }
         public CancellationToken CancellationToken { get; }
+
+        /// <summary>
+        /// Returned from Unicorn on every request
+        /// </summary>
+        public Version UnicornVersion { get; set; }
     }
 
     public abstract class BaseUnicornCommand : BaseUnicornCommand<UnitType>

@@ -4,7 +4,7 @@ using Unicorn.VS.Models;
 
 namespace Unicorn.VS.Types.UnicornCommands
 {
-    public class LegacyReserializeCommand : BaseDatabaseCommand
+    public class LegacyReserializeCommand : BaseReportableCommand
     {
         public LegacyReserializeCommand(UnicornConnection connection, string selectedConfigs, CancellationToken token, Action<StatusReport> reportHandler) 
             : base(connection, selectedConfigs, token, reportHandler)

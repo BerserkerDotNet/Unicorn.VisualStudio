@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -15,12 +16,10 @@ namespace Unicorn.VS.Types.UnicornCommandHandlers
         where TCommand : IUnicornCommand<TResult>
     {
         public const string DefaultConfiguration = "All";
-        protected readonly string _verb;
         protected readonly bool _isStreamed;
 
-        protected BaseUnicornCommandHandler(string verb, bool isStreamed=false)
+        protected BaseUnicornCommandHandler(bool isStreamed=false)
         {
-            _verb = verb;
             _isStreamed = isStreamed;
         }
 
@@ -32,6 +31,13 @@ namespace Unicorn.VS.Types.UnicornCommandHandlers
                 var response = await client.GetAsync(endPoint,
                     _isStreamed ? HttpCompletionOption.ResponseHeadersRead : HttpCompletionOption.ResponseContentRead,
                     ctx.CancellationToken).ConfigureAwait(false);
+                IEnumerable<string> values;
+                if (response.Headers.TryGetValues("X-Unicorn-Version", out values))
+                {
+                    Version version;
+                    Version.TryParse(values.First(), out version);
+                    ctx.UnicornVersion = version ?? new Version();
+                }
                 return await ProcessResponse(response, ctx).ConfigureAwait(false);
             }
         }
@@ -49,11 +55,13 @@ namespace Unicorn.VS.Types.UnicornCommandHandlers
             if (!endpointUrl.StartsWith("http"))
                 endpointUrl = "http://" + endpointUrl;
             var configuration = GetConfiguration(selectedConfiguration);
-            endpointUrl += $"{SettingsHelper.GetSettings().EndPoint}?verb={verbOverride ?? _verb}";
+            endpointUrl += $"{SettingsHelper.GetSettings().EndPoint}?verb={verbOverride ?? GetVerb(connection)}";
             if (!string.IsNullOrEmpty(configuration))
                 endpointUrl += configuration;
             return endpointUrl;
         }
+
+        protected abstract string GetVerb(UnicornConnection connection);
 
         private async Task<HttpClient> CreateClient(UnicornConnection connection, string url)
         {

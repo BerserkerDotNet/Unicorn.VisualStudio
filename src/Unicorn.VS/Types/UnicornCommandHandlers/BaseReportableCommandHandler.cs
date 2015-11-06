@@ -6,14 +6,14 @@ using Unicorn.VS.Types.UnicornCommands;
 
 namespace Unicorn.VS.Types.UnicornCommandHandlers
 {
-    public abstract class BaseDatabaseCommandHandler : BaseUnicornCommandHandler<BaseDatabaseCommand, UnitType>
+    public abstract class BaseReportableCommandHandler : BaseUnicornCommandHandler<BaseReportableCommand, UnitType>
     {
-        protected BaseDatabaseCommandHandler(string verb) 
-            : base(verb, true)
+        protected BaseReportableCommandHandler() 
+            : base(true)
         {
         }
 
-        protected override async Task<UnitType> ProcessResponse(HttpResponseMessage response, BaseDatabaseCommand context)
+        protected override async Task<UnitType> ProcessResponse(HttpResponseMessage response, BaseReportableCommand context)
         {
             using (var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
             {

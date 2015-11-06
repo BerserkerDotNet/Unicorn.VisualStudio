@@ -149,7 +149,7 @@
         <TextBlock Grid.Row="2"                       
                    HorizontalAlignment="Center"
                    VerticalAlignment="Bottom"
-                   Margin="0,0,0,5" Text="Loading..."
+                   Margin="0,0,0,5" Text="{Binding Progress, StringFormat=Loading: {0}%}"
                    Foreground="Black"
                    x:Name="loadingBlock" 
                    Visibility="{Binding IsLoadingStarted, Converter={StaticResource BooleanToVisibilityConverter}}" />
