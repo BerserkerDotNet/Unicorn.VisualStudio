@@ -3,7 +3,6 @@ using System.Linq;
 using System.Text;
 using Unicorn.VS.Exceptions;
 using Unicorn.VS.Models;
-using Unicorn.VS.Types;
 using Unicorn.VS.Types.Logging;
 
 namespace Unicorn.VS.Helpers
@@ -20,7 +19,7 @@ namespace Unicorn.VS.Helpers
 
         public static StatusReport ToReport(this string data)
         {
-            var parts = data.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+            var parts = data.Split('|');
             if (parts.Count() != 3)
                 throw new MalformedPackageReceivedException($"There should be 3 parts of a packet but found {parts.Count()}.");
 

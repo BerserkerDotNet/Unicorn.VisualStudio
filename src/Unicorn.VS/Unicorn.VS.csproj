@@ -146,8 +146,8 @@
     <Compile Include="Types\UnicornCommandHandlers\BaseReportableCommandHandler.cs" />
     <Compile Include="Types\UnicornCommandHandlers\HandshakeCommandHandler.cs" />
     <Compile Include="Types\UnicornCommandHandlers\IsLegacyCommandHandler.cs" />
-    <Compile Include="Types\UnicornCommandHandlers\LegacyReserializeCommandHandler.cs" />
-    <Compile Include="Types\UnicornCommandHandlers\LegacySynchronizeCommandHandler.cs" />
+    <Compile Include="Types\UnicornCommandHandlers\ReserializeCommandHandler.cs" />
+    <Compile Include="Types\UnicornCommandHandlers\SynchronizeCommandHandler.cs" />
     <Compile Include="Types\UnicornCommands\BaseReportableCommand.cs" />
     <Compile Include="Types\UnicornCommands\BaseUnicornCommand.cs" />
     <Compile Include="Types\UnicornCommandHandlers\BaseUnicornCommandHandler.cs" />
@@ -158,8 +158,8 @@
     <Compile Include="Types\UnicornCommands\IsLegacyCommand.cs" />
     <Compile Include="Types\UnicornCommands\ConfigurationsCommand.cs" />
     <Compile Include="Types\UnicornCommandHandlers\ConfigurationsCommandHandler.cs" />
-    <Compile Include="Types\UnicornCommands\LegacyReserializeCommand.cs" />
-    <Compile Include="Types\UnicornCommands\LegacySynchronizeCommand.cs" />
+    <Compile Include="Types\UnicornCommands\ReserializeCommand.cs" />
+    <Compile Include="Types\UnicornCommands\SynchronizeCommand.cs" />
     <Compile Include="Types\UnicornCommands\UnicornCommandsManager.cs" />
     <Compile Include="Types\UnitType.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />

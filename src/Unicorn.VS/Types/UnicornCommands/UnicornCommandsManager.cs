@@ -13,8 +13,8 @@ namespace Unicorn.VS.Types.UnicornCommands
         static UnicornCommandsManager()
         {
             Register<ConfigurationsCommand>(new ConfigurationsCommandHandler());
-            Register<LegacySynchronizeCommand>(new LegacySynchronizeCommandHandler());
-            Register<LegacyReserializeCommand>(new LegacyReserializeCommandHandler());
+            Register<SynchronizeCommand>(new SynchronizeCommandHandler());
+            Register<ReserializeCommand>(new ReserializeCommandHandler());
             Register<HandshakeCommand>(new HandshakeCommandHandler());
             Register<IsLegacyCommand>(new IsLegacyCommandHandler());
         }

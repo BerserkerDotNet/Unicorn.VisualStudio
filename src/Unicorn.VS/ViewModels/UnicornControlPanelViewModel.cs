@@ -240,11 +240,11 @@ namespace Unicorn.VS.ViewModels
                 ResetState();
                 using (var progressContext = new ProgressContext(StatusBar, "Synchronizing"))
                 {
-                    var legacySynchronizeCommand = new LegacySynchronizeCommand(SelectedConnection,
+                    var legacySynchronizeCommand = new SynchronizeCommand(SelectedConnection,
                         SelectedConfigurations, t, s => _dispatcher.Invoke(() => RefreshStatus(s, progressContext)));
                     await UnicornCommandsManager.Execute(legacySynchronizeCommand).ConfigureAwait(false);
                 }
-            },"Synchronization complete", "Synchronization failed").ConfigureAwait(false);
+            },"Synchronization completed", "Synchronization failed").ConfigureAwait(false);
             
         }
 
@@ -261,12 +261,12 @@ namespace Unicorn.VS.ViewModels
                 ResetState();
                 using (var progressContext = new ProgressContext(StatusBar, "Serializing"))
                 {
-                    var legacySynchronizeCommand = new LegacyReserializeCommand(SelectedConnection,
+                    var legacySynchronizeCommand = new ReserializeCommand(SelectedConnection,
                         SelectedConfigurations, t, s => _dispatcher.Invoke(() => RefreshStatus(s, progressContext)));
                     await UnicornCommandsManager.Execute(legacySynchronizeCommand)
                         .ConfigureAwait(false);
                 }
-            }, $"{SelectedConnection} serialized", "Serialization failed").ConfigureAwait(false);
+            }, $"{SelectedConnection} has been serialized", "Serialization failed").ConfigureAwait(false);
         }
 
         private void ShowConnectionDialog(UnicornConnection info = null)

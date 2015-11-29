@@ -22,7 +22,7 @@ namespace Unicorn.VS.Types.UnicornCommandHandlers
 
         protected override string GetVerb(UnicornConnection connection)
         {
-            return connection.IsLegacy ? "Config" : "Configuration";
+            return connection.IsLegacy ? "Config" : "Configurations";
         }
     }
 
