@@ -80,8 +80,8 @@ namespace Unicorn.VS.Types.UnicornCommandHandlers
                 {
                     var signatureService = new SignatureService(connection.Token);
                     var signature = signatureService.CreateSignature(challenge, url, Enumerable.Empty<SignatureFactor>());
-                    httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", signature);
-                    httpClient.DefaultRequestHeaders.TryAddWithoutValidation("X-Nonce", challenge);
+                    httpClient.DefaultRequestHeaders.TryAddWithoutValidation("X-MC-MAC", signature);
+                    httpClient.DefaultRequestHeaders.TryAddWithoutValidation("X-MC-Nonce", challenge);
                 }
 
             }
