@@ -1,0 +1,6 @@
+F:\Programs\CSharp\Unicorn.VisualStudio\Unicorn.Emulator\bin\Debug\Unicorn.Emulator.exe.config
+F:\Programs\CSharp\Unicorn.VisualStudio\Unicorn.Emulator\bin\Debug\Unicorn.Emulator.exe
+F:\Programs\CSharp\Unicorn.VisualStudio\Unicorn.Emulator\bin\Debug\Unicorn.Emulator.pdb
+F:\Programs\CSharp\Unicorn.VisualStudio\Unicorn.Emulator\obj\Debug\Unicorn.Emulator.exe
+F:\Programs\CSharp\Unicorn.VisualStudio\Unicorn.Emulator\obj\Debug\Unicorn.Emulator.pdb
+F:\Programs\CSharp\Unicorn.VisualStudio\Unicorn.Emulator\obj\Debug\Unicorn.Emulator.csprojResolveAssemblyReference.cache

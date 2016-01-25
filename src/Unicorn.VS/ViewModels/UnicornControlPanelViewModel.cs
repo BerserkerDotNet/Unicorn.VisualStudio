@@ -53,6 +53,7 @@ namespace Unicorn.VS.ViewModels
             Synchronize = new Command(ExecuteSynchronize);
             Reserialize = new Command(ExecuteReserialize);
             SelectedConnectionIndex = 0;
+            CheckForConfigurationHealth = SettingsHelper.GetSettings().CheckForConfigurationHealth;
         }
 
         public ObservableCollection<string> Configurations
@@ -150,6 +151,7 @@ namespace Unicorn.VS.ViewModels
                 if (value == _selectedConfigurations) return;
                 _selectedConfigurations = value;
                 OnPropertyChanged();
+                CheckConfigurationHealth();
             }
         }
 
@@ -172,6 +174,7 @@ namespace Unicorn.VS.ViewModels
         public ICommand Synchronize { get; }
         public ICommand Reserialize { get; }
 
+        public bool CheckForConfigurationHealth { get; set; }
         public bool AllowMultipleConfigurations => SettingsHelper.GetSettings().AllowMultipleConfigurations;
 
         private void LoadConnections()
@@ -213,7 +216,7 @@ namespace Unicorn.VS.ViewModels
         {
             var settingsDialog = new Settings();
             settingsDialog.ShowModal();
-
+            CheckForConfigurationHealth = SettingsHelper.GetSettings().CheckForConfigurationHealth;
             OnPropertyChanged(nameof(AllowMultipleConfigurations));
         }
 
@@ -307,6 +310,22 @@ namespace Unicorn.VS.ViewModels
                 }
                 SelectedConfigurationIndex = 0;
             }, $"Connected to {SelectedConnection.Name}", $"{SelectedConnection.Name} failed to connect").ConfigureAwait(false);
+        }
+
+        private async Task CheckConfigurationHealth()
+        {
+            if (SelectedConnection == null || !CheckForConfigurationHealth)
+                return;
+
+            SetStatusBarText("Checking configuration status...");
+            await RefreshConnectionState();
+            await ExecuteSafe(async t =>
+            {
+                IsIndetermine = true;
+                var healthReport = await UnicornCommandsManager.Execute(new CheckConfigurationHealthCommand(SelectedConnection, SelectedConfigurations, t));
+                _statusReports.Clear();
+                healthReport.ToList().ForEach(r => _statusReports.Add(r));
+            }, "Done", "Failed to check configuration status");
         }
 
         private async Task RefreshConnectionState()

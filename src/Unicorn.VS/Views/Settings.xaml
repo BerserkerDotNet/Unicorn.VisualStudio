@@ -9,7 +9,7 @@
         xmlns:platformUi="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.12.0"
                          xmlns:interfaces="clr-namespace:Unicorn.VS.ViewModels.Interfaces"
         Title="Unicorn Control Panel Settings" 
-        Height="150" 
+        Height="185" 
         Width="300" 
         ResizeMode="NoResize" WindowStartupLocation="CenterScreen" 
         Icon="/Unicorn.VS;component/Resources/settings.png" 
@@ -32,6 +32,7 @@
         <Grid.RowDefinitions>
             <RowDefinition MaxHeight="30"/>
             <RowDefinition MaxHeight="35"/>
+            <RowDefinition MaxHeight="35"/>
             <RowDefinition MaxHeight="50"/>
         </Grid.RowDefinitions>
         <Image Source="../Resources/question_tip.png" Grid.Row="0" Grid.Column="0" HorizontalAlignment="left">
@@ -51,8 +52,11 @@
         <CheckBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
                   Margin="10"
                   Content="Enable multiple configurations selection" IsChecked="{Binding AllowMultipleConfigurations}"/>
+        <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
+                  Margin="10"
+                  Content="Check for configuration health" IsChecked="{Binding CheckForConfigurationHealth}"/>
         
-        <Button HorizontalAlignment="Right" Margin="7" Padding="2" Command="{Binding Save}" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2">
+        <Button HorizontalAlignment="Right" Margin="7" Padding="2" Command="{Binding Save}" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2">
             <StackPanel Orientation="Horizontal">
                 <Image Source="../Resources/save.png" Height="24"/>
                 <Label>Save</Label>

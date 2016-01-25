@@ -10,7 +10,7 @@ namespace Unicorn.VS.ViewModels
 {
     public class UnicornSettingsViewModel : BaseViewModel, IDataErrorInfo, IUnicornSettingsViewModel
     {
-        private UnicornSettings _settings;
+        private readonly UnicornSettings _settings;
         public UnicornSettingsViewModel(UnicornSettings settings)
         {
             _settings = settings;
@@ -42,6 +42,16 @@ namespace Unicorn.VS.ViewModels
             set
             {
                 _settings.AllowMultipleConfigurations = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool CheckForConfigurationHealth
+        {
+            get { return _settings.CheckForConfigurationHealth; }
+            set
+            {
+                _settings.CheckForConfigurationHealth = value;
                 OnPropertyChanged();
             }
         }

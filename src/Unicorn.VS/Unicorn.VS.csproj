@@ -132,6 +132,7 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Behaviours\ListBoxBehaviour.cs" />
     <Compile Include="Controls\MultiSelectComboBox.xaml.cs">
       <DependentUpon>MultiSelectComboBox.xaml</DependentUpon>
     </Compile>
@@ -144,6 +145,7 @@
     <Compile Include="Helpers\StringExtensions.cs" />
     <Compile Include="Helpers\VersionHelper.cs" />
     <Compile Include="Types\UnicornCommandHandlers\BaseReportableCommandHandler.cs" />
+    <Compile Include="Types\UnicornCommandHandlers\CheckConfigurationHealthCommandHandler.cs" />
     <Compile Include="Types\UnicornCommandHandlers\HandshakeCommandHandler.cs" />
     <Compile Include="Types\UnicornCommandHandlers\IsLegacyCommandHandler.cs" />
     <Compile Include="Types\UnicornCommandHandlers\ReserializeCommandHandler.cs" />
@@ -154,6 +156,7 @@
     <Compile Include="Types\Interfaces\IUnicornCommand.cs" />
     <Compile Include="Types\Interfaces\IUnicornCommandHandler.cs" />
     <Compile Include="Types\Exceptions\CommandHandlerNotFoundException.cs" />
+    <Compile Include="Types\UnicornCommands\CheckConfigurationHealthCommand.cs" />
     <Compile Include="Types\UnicornCommands\HandshakeCommand.cs" />
     <Compile Include="Types\UnicornCommands\IsLegacyCommand.cs" />
     <Compile Include="Types\UnicornCommands\ConfigurationsCommand.cs" />

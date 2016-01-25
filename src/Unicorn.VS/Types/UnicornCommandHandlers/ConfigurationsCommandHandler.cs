@@ -25,7 +25,4 @@ namespace Unicorn.VS.Types.UnicornCommandHandlers
             return connection.IsLegacy ? "Config" : "Configurations";
         }
     }
-
-    
-
 }

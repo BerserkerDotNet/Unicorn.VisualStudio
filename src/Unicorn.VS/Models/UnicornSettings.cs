@@ -5,5 +5,7 @@ namespace Unicorn.VS.Models
         public string EndPoint { get; set; }
 
         public bool AllowMultipleConfigurations { get; set; }
+
+        public bool CheckForConfigurationHealth { get; set; }
     }
 }

@@ -20,6 +20,7 @@ namespace Unicorn.VS.Data
         private const string ConnectionTokenKey = "Token";
         private const string SettingsEndPointKey = "EndPoint";
         private const string SettingsAllowMultipleConfigsKey = "AllowMultipleConfigurations";
+        private const string SettingsCheckForConfigurationHealthKey = "CheckForConfigurationHealth";
 
         public static void SaveConnection(UnicornConnection connectionViewModel)
         {
@@ -97,7 +98,8 @@ namespace Unicorn.VS.Data
             var store = GetStore();
             return new UnicornSettings
             {
-                AllowMultipleConfigurations = store.GetBoolean(UnicornSettingsRoot, SettingsAllowMultipleConfigsKey,false),
+                AllowMultipleConfigurations = store.GetBoolean(UnicornSettingsRoot, SettingsAllowMultipleConfigsKey, false),
+                CheckForConfigurationHealth = store.GetBoolean(UnicornSettingsRoot, SettingsCheckForConfigurationHealthKey, true),
                 EndPoint = store.GetString(UnicornSettingsRoot, SettingsEndPointKey, SettingsDefaultEndPoint)
             };
         }
@@ -107,6 +109,7 @@ namespace Unicorn.VS.Data
             EnsureCollectionExists(UnicornSettingsRoot);
             var store = GetStore();
             store.SetBoolean(UnicornSettingsRoot, SettingsAllowMultipleConfigsKey, settings.AllowMultipleConfigurations);
+            store.SetBoolean(UnicornSettingsRoot, SettingsCheckForConfigurationHealthKey, settings.CheckForConfigurationHealth);
             store.SetString(UnicornSettingsRoot, SettingsEndPointKey, settings.EndPoint);
         }
     }

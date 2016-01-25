@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unicorn.Remote", "src\Unicorn.Remote\Unicorn.Remote.csproj", "{8C9B449C-D0DC-4263-B961-8D398A36D912}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unicorn.VS", "src\Unicorn.VS\Unicorn.VS.csproj", "{5A3F6A3F-92CA-4F6E-98A3-89963B99FC9F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroCHAP", "..\MicroCHAP\src\MicroCHAP\MicroCHAP.csproj", "{1C702C4B-F5AE-4E32-A6C6-1EF965168229}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unicorn.Emulator", "Unicorn.Emulator\Unicorn.Emulator.csproj", "{1212653F-C437-419A-A449-6544C2D6EB5C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{1C702C4B-F5AE-4E32-A6C6-1EF965168229}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C702C4B-F5AE-4E32-A6C6-1EF965168229}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C702C4B-F5AE-4E32-A6C6-1EF965168229}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1212653F-C437-419A-A449-6544C2D6EB5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1212653F-C437-419A-A449-6544C2D6EB5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1212653F-C437-419A-A449-6544C2D6EB5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1212653F-C437-419A-A449-6544C2D6EB5C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

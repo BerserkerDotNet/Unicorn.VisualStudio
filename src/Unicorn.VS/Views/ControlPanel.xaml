@@ -9,6 +9,7 @@
              xmlns:helpers="clr-namespace:Unicorn.VS.Helpers"
              xmlns:controls="clr-namespace:Unicorn.VS.Controls"
              xmlns:viewModels="clr-namespace:Unicorn.VS.ViewModels"
+             xmlns:behaviours="clr-namespace:Unicorn.VS.Behaviours"
              Background="{DynamicResource {x:Static shell:VsBrushes.WindowKey}}"
              Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}"
              mc:Ignorable="d"
@@ -111,8 +112,11 @@
             </Button>
         </StackPanel>
         <!--Log box-->
-        <ListBox helpers:ListBoxExtenders.AutoScrollToEnd="True" Grid.Row="1" ItemsSource="{Binding StatusReports}" Background="{DynamicResource {x:Static shell:VsBrushes.WindowKey}}" 
-                 Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}" BorderBrush="{DynamicResource {x:Static shell:VsBrushes.AccentBorderKey}}">
+        <ListBox helpers:ListBoxExtenders.AutoScrollToEnd="True" Grid.Row="1" ItemsSource="{Binding StatusReports}" 
+                 Background="{DynamicResource {x:Static shell:VsBrushes.WindowKey}}" 
+                 Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}" 
+                 BorderBrush="{DynamicResource {x:Static shell:VsBrushes.AccentBorderKey}}"
+                 behaviours:ListBoxBehaviour.AutoCopy="True">
             <ListBox.Resources>
                 <Style TargetType="{x:Type ListBoxItem}">
                     <Style.Triggers>

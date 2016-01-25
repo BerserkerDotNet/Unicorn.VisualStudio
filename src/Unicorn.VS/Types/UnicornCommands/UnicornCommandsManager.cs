@@ -17,6 +17,7 @@ namespace Unicorn.VS.Types.UnicornCommands
             Register<ReserializeCommand>(new ReserializeCommandHandler());
             Register<HandshakeCommand>(new HandshakeCommandHandler());
             Register<IsLegacyCommand>(new IsLegacyCommandHandler());
+            Register<CheckConfigurationHealthCommand>(new CheckConfigurationHealthCommandHandler());
         }
 
         private static Dictionary<Type, object> _commandHandlers = new Dictionary<Type, object>(5);
