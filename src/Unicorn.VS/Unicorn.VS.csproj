@@ -233,7 +233,6 @@
     <None Include="Resources\Images.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\search.png" />
     <Resource Include="Resources\question_tip.png" />
     <Resource Include="Resources\settings.png" />
     <Resource Include="Resources\update_required.png" />
