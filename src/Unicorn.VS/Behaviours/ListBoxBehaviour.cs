@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using Unicorn.VS.Models;
+using Unicorn.VS.Views;
 
 namespace Unicorn.VS.Behaviours
 {

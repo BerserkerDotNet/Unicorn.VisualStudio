@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows.Input;
 using Unicorn.VS.Models;
 
@@ -7,7 +8,7 @@ namespace Unicorn.VS.ViewModels.Interfaces
     public interface IControlPanelViewModel
     {
         ObservableCollection<string> Configurations { get; set; }
-        ObservableCollection<StatusReport> StatusReports { get; set; }
+        ICollectionView StatusReports { get; set; }
         ObservableCollection<UnicornConnection> Connections { get; set; }
 
         int Progress { get; set; }

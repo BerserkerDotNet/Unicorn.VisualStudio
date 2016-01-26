@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unicorn.VS", "src\Unicorn.V
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroCHAP", "..\MicroCHAP\src\MicroCHAP\MicroCHAP.csproj", "{1C702C4B-F5AE-4E32-A6C6-1EF965168229}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unicorn.Emulator", "Unicorn.Emulator\Unicorn.Emulator.csproj", "{1212653F-C437-419A-A449-6544C2D6EB5C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unicorn.Emulator", "src\Unicorn.Emulator\Unicorn.Emulator.csproj", "{1212653F-C437-419A-A449-6544C2D6EB5C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,9 +1,11 @@
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -27,6 +29,7 @@ namespace Unicorn.VS.ViewModels
         private readonly Dispatcher _dispatcher;
         private ObservableCollection<string> _configurations;
         private ObservableCollection<StatusReport> _statusReports;
+        private ICollectionView _reportsView;
         private ObservableCollection<UnicornConnection> _connections;
         private int _progress;
         private bool _isIndetermine;
@@ -35,6 +38,7 @@ namespace Unicorn.VS.ViewModels
         private bool _isLoadingStarted;
         private string _selectedConfigurations;
         private int _selectedConfigurationIndex;
+        private string _searchText;
         private CancellationTokenSource _cancellationTokenSource;
         private IVsStatusbar _bar;
 
@@ -44,7 +48,9 @@ namespace Unicorn.VS.ViewModels
 
             _configurations = new ObservableCollection<string>(new[] { DefaultConfiguration });
             LoadConnections();
-            StatusReports = new ObservableCollection<StatusReport>();
+            _statusReports = new ObservableCollection<StatusReport>();
+            StatusReports = CollectionViewSource.GetDefaultView(_statusReports);
+            StatusReports.Filter = FilterReports;
             CreateNewConnection = new Command(ExecuteCreateNewConnection);
             RemoveSelectedConnection = new Command(ExecuteRemoveSelectedConnection);
             EditSelectedConnection = new Command<string>(ExecuteEditSelectedConnection);
@@ -52,8 +58,21 @@ namespace Unicorn.VS.ViewModels
             CancelCurrentJob = new Command(ExecuteCancelCurrentJob);
             Synchronize = new Command(ExecuteSynchronize);
             Reserialize = new Command(ExecuteReserialize);
+            ClearSearch = new Command(ExecuteClearSearch);
             SelectedConnectionIndex = 0;
             CheckForConfigurationHealth = SettingsHelper.GetSettings().CheckForConfigurationHealth;
+        }
+
+        private bool FilterReports(object item)
+        {
+            if (string.IsNullOrEmpty(SearchText))
+                return true;
+
+            var report = item as StatusReport;
+            if (report == null || string.IsNullOrEmpty(report.Message))
+                return true;
+
+            return report.Message.Contains(SearchText);
         }
 
         public ObservableCollection<string> Configurations
@@ -66,12 +85,12 @@ namespace Unicorn.VS.ViewModels
             }
         }
 
-        public ObservableCollection<StatusReport> StatusReports
+        public ICollectionView StatusReports
         {
-            get { return _statusReports; }
+            get { return _reportsView; }
             set
             {
-                _statusReports = value;
+                _reportsView = value;
                 OnPropertyChanged();
             }
         }
@@ -166,6 +185,18 @@ namespace Unicorn.VS.ViewModels
             }
         }
 
+        public string SearchText
+        {
+            get { return _searchText; }
+            set
+            {
+                if (value == _searchText) return;
+                _searchText = value;
+                OnPropertyChanged();
+                StatusReports.Refresh();
+            }
+        }
+
         public ICommand CreateNewConnection { get; }
         public ICommand RemoveSelectedConnection { get; }
         public ICommand EditSelectedConnection { get; }
@@ -173,6 +204,7 @@ namespace Unicorn.VS.ViewModels
         public ICommand CancelCurrentJob { get; }
         public ICommand Synchronize { get; }
         public ICommand Reserialize { get; }
+        public ICommand ClearSearch { get; }
 
         public bool CheckForConfigurationHealth { get; set; }
         public bool AllowMultipleConfigurations => SettingsHelper.GetSettings().AllowMultipleConfigurations;
@@ -272,6 +304,12 @@ namespace Unicorn.VS.ViewModels
             }, $"{SelectedConnection} has been serialized", "Serialization failed").ConfigureAwait(false);
         }
 
+        private void ExecuteClearSearch()
+        {
+            SearchText = string.Empty;
+            StatusReports.Refresh();
+        }
+
         private void ShowConnectionDialog(UnicornConnection info = null)
         {
             var shouldUpdate = SelectedConnection != null;
@@ -363,7 +401,8 @@ namespace Unicorn.VS.ViewModels
 
         private void ResetState()
         {
-            StatusReports.Clear();
+            _statusReports.Clear();
+            StatusReports.Refresh();
             Progress = 0;
             IsIndetermine = false;
         }
@@ -378,11 +417,11 @@ namespace Unicorn.VS.ViewModels
                     progressContext.SetProgress((uint)Progress);
                 }
                 else
-                    StatusReports.Add(report);
+                    _statusReports.Add(report);
             }
             catch (Exception ex)
             {
-                StatusReports.Add(StatusReport.CreateOperation("Malformated package. " + ex.Message,
+                _statusReports.Add(StatusReport.CreateOperation("Malformated package. " + ex.Message,
                     MessageLevel.Error, OperationType.None));
             }
         }
@@ -398,7 +437,6 @@ namespace Unicorn.VS.ViewModels
                 StatusBar.SetText(text);
             }
         }
-
     }
 
     public class ProgressContext : IDisposable

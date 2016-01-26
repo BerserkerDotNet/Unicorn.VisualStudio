@@ -13,7 +13,7 @@
              Background="{DynamicResource {x:Static shell:VsBrushes.WindowKey}}"
              Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="600"
+             d:DesignHeight="300" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance viewModels:UnicornControlPanelViewModel, IsDesignTimeCreatable=False}"
              Name="UnicornControlPanel">
     <UserControl.Resources>
@@ -45,7 +45,7 @@
             </RowDefinition>
         </Grid.RowDefinitions>
         <!--Menu panel-->
-        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="2">
+        <DockPanel Grid.Row="0" Margin="2">
             <Button Margin="0,0,5,0"
                     Background="Transparent" 
                     BorderBrush="Transparent" 
@@ -110,13 +110,30 @@
                     IsEnabled="{Binding IsLoadingStarted, Converter={StaticResource InversedBooleanConverter}}">
                 <Image Source="../Resources/settings.png"/>
             </Button>
-        </StackPanel>
+            <Grid DockPanel.Dock="Right" HorizontalAlignment="Right">
+                <TextBox Width="200" x:Name="SearchBox" 
+                         Style="{StaticResource PlaceHolder}" 
+                         Tag="Type to search..." 
+                         Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         IsEnabled="{Binding IsLoadingStarted, Converter={StaticResource InversedBooleanConverter}}"
+                         />
+                <Button
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Right"
+                    Background="Transparent" BorderBrush="Transparent" ToolTip="Clear Search"
+                    IsEnabled="{Binding IsLoadingStarted, Converter={StaticResource InversedBooleanConverter}}"
+                    Padding="2"
+                    Command="{Binding ClearSearch}">
+                    <Image Source="../Resources/clear.png"/>
+                </Button>
+            </Grid>
+        </DockPanel>
         <!--Log box-->
-        <ListBox helpers:ListBoxExtenders.AutoScrollToEnd="True" Grid.Row="1" ItemsSource="{Binding StatusReports}" 
+        <ListBox helpers:ListBoxExtenders.AutoScrollToEnd="True" Grid.Row="1" ItemsSource="{Binding StatusReports}"
                  Background="{DynamicResource {x:Static shell:VsBrushes.WindowKey}}" 
                  Foreground="{DynamicResource {x:Static shell:VsBrushes.WindowTextKey}}" 
                  BorderBrush="{DynamicResource {x:Static shell:VsBrushes.AccentBorderKey}}"
-                 behaviours:ListBoxBehaviour.AutoCopy="True">
+                 behaviours:ListBoxBehaviour.AutoCopy="True" x:Name="messageLog">
             <ListBox.Resources>
                 <Style TargetType="{x:Type ListBoxItem}">
                     <Style.Triggers>

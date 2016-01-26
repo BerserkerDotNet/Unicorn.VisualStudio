@@ -16,7 +16,7 @@ namespace Unicorn.VS.Types.UnicornCommandHandlers
             try
             {
                 if (!response.IsSuccessStatusCode)
-                    return new[] { StatusReport.CreateOperation("Cannot read configuration status. Read more.", MessageLevel.Warning, OperationType.None) };
+                    return new[] { StatusReport.CreateOperation("Configuration status cannot be read. Most likely your version of Unicorn does not support it. You can turn it off in settings to remove this message.", MessageLevel.Warning, OperationType.None) };
 
                 var data = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var reports = data.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);

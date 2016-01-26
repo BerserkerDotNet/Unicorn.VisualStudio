@@ -10,6 +10,7 @@ namespace Unicorn.Emulator
 {
     class Program
     {
+        static Random _random = new Random(0);
         private static Dictionary<string, IRequestHandler> _handlers = new Dictionary<string, IRequestHandler>();
         private static bool _isAdminMode = false;
 
@@ -62,7 +63,7 @@ namespace Unicorn.Emulator
                     var rData = Encoding.UTF8.GetBytes(renderResponse);
                     await stream.WriteAsync(rData, 0, rData.Length);
                     await stream.FlushAsync();
-                    Thread.Sleep(500);
+                    Thread.Sleep(_random.Next(100, 500));
                 } while (!response.IsComplete);
                 connection.Close();
                 connection.Dispose();
