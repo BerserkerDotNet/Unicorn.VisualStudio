@@ -15,6 +15,8 @@ namespace Unicorn.VS.Types.UnicornCommandHandlers
 
         protected override async Task<UnitType> ProcessResponse(HttpResponseMessage response, BaseReportableCommand context)
         {
+            response.EnsureSuccessStatusCode();
+
             using (var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
             {
                 using (var sr = new StreamReader(stream))

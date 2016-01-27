@@ -13,6 +13,8 @@ namespace Unicorn.VS.Types.UnicornCommandHandlers
 
         protected override async Task<IEnumerable<string>> ProcessResponse(HttpResponseMessage response, ConfigurationsCommand context)
         {
+            response.EnsureSuccessStatusCode();
+
             var configsString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             var configs = response.IsSuccessStatusCode
                 ? configsString.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries)

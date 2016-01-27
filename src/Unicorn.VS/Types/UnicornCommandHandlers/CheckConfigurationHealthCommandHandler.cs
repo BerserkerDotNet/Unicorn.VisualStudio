@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Unicorn.VS.Models;
@@ -15,6 +16,9 @@ namespace Unicorn.VS.Types.UnicornCommandHandlers
         {
             try
             {
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    return Enumerable.Empty<StatusReport>();
+
                 if (!response.IsSuccessStatusCode)
                     return new[] { StatusReport.CreateOperation("Configuration status cannot be read. Most likely your version of Unicorn does not support it. You can turn it off in settings to remove this message.", MessageLevel.Warning, OperationType.None) };
 

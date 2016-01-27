@@ -5,7 +5,6 @@ using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Settings;
 using Unicorn.VS.Models;
-using Unicorn.VS.ViewModels;
 
 namespace Unicorn.VS.Data
 {
@@ -33,6 +32,8 @@ namespace Unicorn.VS.Data
             store.SetString(connectionPath, ConnectionUrlKey, connectionViewModel.ServerUrl);
             if (!string.IsNullOrEmpty(connectionViewModel.Token))
                 store.SetString(connectionPath, ConnectionTokenKey, connectionViewModel.Token);
+            else
+                store.DeleteProperty(connectionPath, ConnectionTokenKey);
         }
 
         public static void DeleteConnection(string id)

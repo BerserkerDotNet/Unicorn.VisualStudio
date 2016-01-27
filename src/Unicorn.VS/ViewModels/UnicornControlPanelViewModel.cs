@@ -361,8 +361,12 @@ namespace Unicorn.VS.ViewModels
             {
                 IsIndetermine = true;
                 var healthReport = await UnicornCommandsManager.Execute(new CheckConfigurationHealthCommand(SelectedConnection, SelectedConfigurations, t));
-                _statusReports.Clear();
-                healthReport.ToList().ForEach(r => _statusReports.Add(r));
+                if (healthReport.Any())
+                {
+                    _statusReports.Clear();
+                    healthReport.ToList().ForEach(r => _statusReports.Add(r));
+                }
+
             }, "Done", "Failed to check configuration status");
         }
 
@@ -390,8 +394,14 @@ namespace Unicorn.VS.ViewModels
             catch (Exception ex)
             {
                 SetStatusBarText(statusBarFailText);
-                var msg = $"Error while executing operation on server '{_selectedConnection.Name}': {ex.Message}";
-                MessageBox.Show(msg, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _dispatcher.Invoke(() =>
+                {
+                    var msg = $"Error while executing operation on server '{_selectedConnection.Name}': {ex.Message}";
+                    _statusReports.Clear();
+                    _statusReports.Add(StatusReport.CreateOperation(msg, MessageLevel.Error, OperationType.None));
+                    StatusReports.Refresh();
+                });
+
             }
             finally
             {
