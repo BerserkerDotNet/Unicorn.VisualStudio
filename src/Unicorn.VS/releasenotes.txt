@@ -1,3 +1,10 @@
-Version 1.4
-- Support for upcoming changes in Unicorn 3.1
-- Progress status is now displayed in VS status bar
+Version 1.5
+- Better support for Unicorn 3.1
+- Configuration status messages
+- Search in logs
+- Copy log entry to clipboard
+
+*BREAKING CHANGES*
+
+In Unicorn 3.1 "/unicornRemote.aspx" was removed, now you can use "/unicorn.aspx". 
+Please make sure to update your settings.
