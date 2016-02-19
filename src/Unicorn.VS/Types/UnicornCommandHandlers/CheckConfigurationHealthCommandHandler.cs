@@ -37,7 +37,11 @@ namespace Unicorn.VS.Types.UnicornCommandHandlers
         {
             var parts = report.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
             if (parts.Count() < 4)
-                yield return StatusReport.CreateOperation("Error parsing configuration report", MessageLevel.Error, OperationType.None);
+            {
+                yield return StatusReport.CreateOperation("Error parsing configuration report. Server did not return a correct response.", MessageLevel.Error, OperationType.None);
+                yield break;
+            }
+            
 
             var name = parts[0];
             var hasAnySerializedItems = bool.Parse(parts[1]);

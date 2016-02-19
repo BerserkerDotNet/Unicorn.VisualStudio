@@ -74,6 +74,11 @@ namespace Unicorn.Emulator
             return new UnicornResponse {StatusCode = 404, StatusMessage = "Not Found"};
         }
 
+        public static UnicornResponse CreateInternalServerError()
+        {
+            return new UnicornResponse {StatusCode = 500, StatusMessage ="Internal Server Error"};
+        }
+
         public static UnicornResponse CreateChunked()
         {
             return new UnicornResponse { StatusCode = 206, StatusMessage = "Partial Content" };

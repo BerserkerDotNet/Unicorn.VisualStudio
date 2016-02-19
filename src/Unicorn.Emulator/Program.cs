@@ -29,7 +29,7 @@ namespace Unicorn.Emulator
             _handlers.Add("version", new VersionHandler());
             _handlers.Add("vssync", new SyncHandler());
             _handlers.Add("vsreserialize", new ReSerializeHandler());
-           // _handlers.Add("configurationhealth", new ConfigurationHealthHandler());
+            _handlers.Add("configurationhealth", new ConfigurationHealthHandler());
             _handlers.Add("configurations", new ConfigurationsHandler());
         }
 
