@@ -1,6 +1,11 @@
 # Unicorn Control Panel
 
+<!-- Replace this badge with your own-->
+[![Build status](https://ci.appveyor.com/api/projects/status/1ac22v2o5rry8xhi?svg=true)](https://ci.appveyor.com/project/BerserkerDotNet/unicorn-visualstudio)
 
+<!-- Update the VS Gallery link after you upload the VSIX-->
+Download this extension from the [VS Gallery](https://visualstudiogallery.msdn.microsoft.com/64439022-f470-422a-b663-fbb89aaf6e86)
+or get the [CI build](http://vsixgallery.com/extension/841bbcc7-596f-47ea-a223-94dc6d023562/).
 
 ---------------------------------------
 

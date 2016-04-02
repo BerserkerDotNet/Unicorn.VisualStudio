@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unicorn.Remote", "src\Unico
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unicorn.VS", "src\Unicorn.VS\Unicorn.VS.csproj", "{5A3F6A3F-92CA-4F6E-98A3-89963B99FC9F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroCHAP", "..\MicroCHAP\src\MicroCHAP\MicroCHAP.csproj", "{1C702C4B-F5AE-4E32-A6C6-1EF965168229}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unicorn.Emulator", "src\Unicorn.Emulator\Unicorn.Emulator.csproj", "{1212653F-C437-419A-A449-6544C2D6EB5C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8CF0DFC3-589D-4FE2-8F08-E33B93CE3E9B}"
@@ -33,10 +31,6 @@ Global
 		{5A3F6A3F-92CA-4F6E-98A3-89963B99FC9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A3F6A3F-92CA-4F6E-98A3-89963B99FC9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5A3F6A3F-92CA-4F6E-98A3-89963B99FC9F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1C702C4B-F5AE-4E32-A6C6-1EF965168229}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1C702C4B-F5AE-4E32-A6C6-1EF965168229}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1C702C4B-F5AE-4E32-A6C6-1EF965168229}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1C702C4B-F5AE-4E32-A6C6-1EF965168229}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1212653F-C437-419A-A449-6544C2D6EB5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1212653F-C437-419A-A449-6544C2D6EB5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1212653F-C437-419A-A449-6544C2D6EB5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
