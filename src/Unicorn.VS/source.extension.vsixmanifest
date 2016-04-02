@@ -5,7 +5,7 @@
     <DisplayName>Unicorn Control Panel</DisplayName>
     <Description>Unicorn control panel for Visual Studio</Description>
     <MoreInfo>https://github.com/BerserkerDotNet/Unicorn.VisualStudio</MoreInfo>
-    <License>license.txt</License>
+    <License>license</License>
     <GettingStartedGuide>https://github.com/BerserkerDotNet/Unicorn.VisualStudio/wiki</GettingStartedGuide>
     <ReleaseNotes>releasenotes.txt</ReleaseNotes>
     <Icon>Resources\Package.ico</Icon>

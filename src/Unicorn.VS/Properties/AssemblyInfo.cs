@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Unicorn.VS")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Andrii Snigyr")]
+[assembly: AssemblyCompany("Andrii Snihyr")]
 [assembly: AssemblyProduct("Unicorn.VS")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
